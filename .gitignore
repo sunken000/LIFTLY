@@ -1,0 +1,17 @@
+*.iml
+.gradle/
+.gradle-user-home/
+.gradle-*-project-cache/
+.gradle-*-user-home/
+.kotlin/
+.tmp-who/
+.tmp-icon-review/
+/local.properties
+/.idea/
+**/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.jks
+*.keystore
+app/release/

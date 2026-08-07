@@ -1,0 +1,1 @@
+-keep class com.anipresence.app.data.detection.AnimeNotificationListenerService { *; }

@@ -1,0 +1,11 @@
+<resources>
+    <style name="Theme.Liftly" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/liftly_black</item>
+        <item name="android:navigationBarColor">@color/liftly_black</item>
+    </style>
+    <style name="Theme.Liftly.Splash" parent="Theme.Liftly">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

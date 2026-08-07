@@ -1,0 +1,62 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:prePersonalDebugBuild UP-TO-DATE
+> Task :app:generatePersonalDebugBuildConfig
+> Task :app:generatePersonalDebugResources UP-TO-DATE
+> Task :app:packagePersonalDebugResources UP-TO-DATE
+> Task :app:processPersonalDebugNavigationResources UP-TO-DATE
+> Task :app:parsePersonalDebugLocalResources UP-TO-DATE
+> Task :app:generatePersonalDebugRFile UP-TO-DATE
+> Task :app:javaPreCompilePersonalDebug
+> Task :app:checkPersonalDebugAarMetadata
+> Task :app:mapPersonalDebugSourceSetPaths
+> Task :app:compilePersonalDebugNavigationResources
+> Task :app:createPersonalDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksPersonalDebug
+> Task :app:mergePersonalDebugResources
+> Task :app:processPersonalDebugMainManifest
+> Task :app:processPersonalDebugManifest
+> Task :app:prePersonalDebugUnitTestBuild UP-TO-DATE
+> Task :app:generatePersonalDebugAssets UP-TO-DATE
+> Task :app:javaPreCompilePersonalDebugUnitTest
+> Task :app:mergePersonalDebugAssets
+> Task :app:processPersonalDebugUnitTestManifest
+> Task :app:processPersonalDebugManifestForPackage
+> Task :app:processPersonalDebugResources
+> Task :app:packagePersonalDebugUnitTestForUnitTest
+> Task :app:generatePersonalDebugUnitTestConfig
+> Task :app:kspPersonalDebugKotlin
+> Task :app:compilePersonalDebugKotlin
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt:416:55 Unnecessary safe call on a non-null receiver of type 'WorkoutExerciseEntity'.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt:420:62 Unnecessary safe call on a non-null receiver of type 'WorkoutExerciseEntity'.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt:422:32 Unnecessary safe call on a non-null receiver of type 'WorkoutExerciseEntity'.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt:425:33 Unnecessary safe call on a non-null receiver of type 'WorkoutExerciseEntity'.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt:429:55 Unnecessary safe call on a non-null receiver of type 'WorkoutExerciseEntity'.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt:433:69 Unnecessary safe call on a non-null receiver of type 'WorkoutExerciseEntity'.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/ui/screens/BusinessScreen.kt:200:53 'val Icons.Filled.ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/ui/screens/BusinessScreen.kt:536:40 'val Icons.Filled.ArrowForward: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowForward.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/ui/screens/ProfileScreen.kt:1178:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/ui/screens/TodayScreen.kt:882:46 Condition is always 'true'.
+w: file:///C:/Users/Tarnished/Documents/LIFTLY/app/src/main/java/com/liftly/app/ui/screens/TodayScreen.kt:1082:52 Condition is always 'true'.
+
+> Task :app:compilePersonalDebugJavaWithJavac
+> Task :app:processPersonalDebugJavaRes
+> Task :app:bundlePersonalDebugClassesToCompileJar
+> Task :app:bundlePersonalDebugClassesToRuntimeJar
+> Task :app:kspPersonalDebugUnitTestKotlin
+> Task :app:compilePersonalDebugUnitTestKotlin
+> Task :app:compilePersonalDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:copyRoomSchemas NO-SOURCE
+> Task :app:processPersonalDebugUnitTestJavaRes
+
+> Task :app:testPersonalDebugUnitTest
+
+BarbellPlateCalculatorTest > eighty kilograms uses twenty and ten on each side FAILED
+    java.lang.AssertionError at BarbellPlateCalculatorTest.kt:13
+
+ProgressionCoachTest > latest assessed set drives suggestion even when an earlier set has no rir FAILED
+    java.lang.AssertionError at ProgressionCoachTest.kt:213
+
+> Task :app:testPersonalDebugUnitTest FAILED
+32 actionable tasks: 27 executed, 5 up-to-date

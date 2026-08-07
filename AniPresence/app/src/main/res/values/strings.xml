@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">AniPresence</string>
+    <string name="notification_access_label">Detecção de mídia do AniPresence</string>
+</resources>

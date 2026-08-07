@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Liftly</string>
+    <string name="widget_today_name">Treino de hoje</string>
+    <string name="widget_today_description">Veja o treino planejado para hoje e abra o Liftly com um toque.</string>
+    <string name="widget_brand">LIFTLY</string>
+    <string name="widget_today_default_status">HOJE</string>
+    <string name="widget_today_default_title">Treino do dia</string>
+    <string name="widget_today_default_subtitle">Exercícios planejados para hoje</string>
+    <string name="widget_today_default_action">Abrir treino  →</string>
+</resources>
