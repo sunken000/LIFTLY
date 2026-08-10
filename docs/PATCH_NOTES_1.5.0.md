@@ -53,7 +53,7 @@ Antes da compra, cada card informa descrição, raridade, preço e nível necess
 - Área própria para consultar todos os itens adquiridos.
 - Identificação clara do cosmético equipado em cada categoria.
 - Troca de item sem uma nova cobrança.
-- Extrato recente de ganhos, bônus de missão, compras e ajustes administrativos.
+- Extrato recente de ganhos, bônus de missão, compras e ajustes de saldo.
 - Saldo, XP, nível e progresso atualizados junto com as ações realizadas.
 
 ## 🛡️ Regras de integridade
@@ -64,33 +64,6 @@ Antes da compra, cada card informa descrição, raridade, preço e nível necess
 - Compra, débito de moedas e inclusão no inventário são processados como uma única operação.
 - Missões já premiadas não liberam a recompensa novamente.
 - O sistema preserva inventário, saldo, missões e extrato nos dados locais e nos recursos de exportação/importação do Liftly.
-
-## 👤 APK normal
-
-A versão normal apresenta apenas a experiência final do usuário:
-
-- carteira com XP, Lift Coins e nível;
-- missões e progresso;
-- loja, compra e inventário;
-- equipar e remover recompensas;
-- extrato de atividades.
-
-Nenhum atalho administrativo aparece nessa edição.
-
-## 🧪 APK Admin
-
-A edição Admin inclui um painel de testes separado para validar a economia sem precisar completar dezenas de treinos reais:
-
-- adicionar ou remover XP e Lift Coins;
-- testar saldo insuficiente e requisitos de nível;
-- simular treino padrão, treino completo e treino com recorde;
-- simular missão diária, semanal ou mensal;
-- desbloquear todo o catálogo;
-- acompanhar saldo, nível, sequência, missões e quantidade de itens liberados;
-- resetar integralmente a economia de teste;
-- ativar **“Visualizar como usuário comum”**, escondendo os controles administrativos para conferir a mesma apresentação do APK normal.
-
-As ferramentas de simulação existem somente no APK Admin. Elas não ficam acessíveis no APK distribuído aos usuários.
 
 ## 🔧 Correções preservadas da versão 1.4
 
