@@ -27,7 +27,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Apply consolidation
-        run: python3 tools/liftly_153_cleanup.py
+        shell: bash
+        run: |
+          cp tools/liftly_153_cleanup.py /tmp/liftly_153_cleanup.py
+          rm -f tools/liftly_153_cleanup.py
+          rm -f .github/workflows/liftly-153-cleanup.yml
+          rm -f .github/workflows/liftly-153-comment-trigger.yml
+          python3 /tmp/liftly_153_cleanup.py
 
       - name: Build Liftly 1.5.3
         shell: bash
@@ -41,9 +47,6 @@ jobs:
       - name: Commit and publish
         shell: bash
         run: |
-          rm -f .github/workflows/liftly-153-cleanup.yml
-          rm -f .github/workflows/liftly-153-comment-trigger.yml
-          rm -f tools/liftly_153_cleanup.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
