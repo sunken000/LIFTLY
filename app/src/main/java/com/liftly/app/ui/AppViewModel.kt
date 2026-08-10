@@ -279,6 +279,10 @@ class AppViewModel(
     fun removeWorkoutExercise(id: String) = act("Exercício removido.") { repository.removeWorkoutExercise(id); updateTodayWidget() }
     fun moveWorkoutExercise(workoutId: String, id: String, direction: Int) = act { repository.moveWorkoutExercise(workoutId, id, direction); updateTodayWidget() }
     fun moveWorkoutExerciseBefore(workoutId: String, id: String, beforeId: String) = act { repository.moveWorkoutExerciseBefore(workoutId, id, beforeId); updateTodayWidget() }
+    fun pairWorkoutExercisesAsBiSet(workoutId: String, firstId: String, secondId: String) =
+        act("Bi-set criado.") { repository.pairWorkoutExercisesAsBiSet(workoutId, firstId, secondId); updateTodayWidget() }
+    fun unpairWorkoutBiSet(workoutId: String, itemId: String) =
+        act("Bi-set desfeito.") { repository.unpairWorkoutBiSet(workoutId, itemId); updateTodayWidget() }
     fun saveCustomExercise(exercise: ExerciseEntity) = act("Exercício personalizado salvo.") { repository.saveExercise(exercise) }
     fun renameExercise(id: String, name: String) = act("Nome do exercício atualizado.") { repository.renameExercise(id, name) }
     fun toggleFavorite(exercise: ExerciseEntity) = act { repository.toggleFavorite(exercise) }

@@ -42,6 +42,8 @@ import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.LinkOff
 import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Search
@@ -98,6 +100,7 @@ import com.liftly.app.domain.SuggestionSeverity
 import com.liftly.app.domain.BarbellPlateCalculator
 import com.liftly.app.domain.ExerciseSubstitutionEngine
 import com.liftly.app.domain.ExerciseSubstitutionOptions
+import com.liftly.app.domain.SupersetPlanner
 import com.liftly.app.domain.WORKOUT_ANALYSIS_DISCLAIMER
 import com.liftly.app.domain.WorkoutAnalyzer
 import com.liftly.app.domain.WorkoutSuggestion
@@ -129,6 +132,7 @@ fun WorkoutsScreen(
     val workoutExercises by vm.workoutExercises.collectAsStateWithLifecycle()
     val activeWorkouts = workouts.filterNot { it.archived }
     var selectedWorkoutId by rememberSaveable { mutableStateOf<String?>(null) }
+    var biSetSourceId by rememberSaveable(selectedWorkoutId) { mutableStateOf<String?>(null) }
     var sharingWorkout by remember { mutableStateOf<WorkoutEntity?>(null) }
     var sharePayload by remember { mutableStateOf<String?>(null) }
     var shareFailure by remember { mutableStateOf<String?>(null) }
@@ -222,6 +226,7 @@ fun WorkoutsScreen(
     LaunchedEffect(selectedWorkoutId) {
         suggestions = null
         ignoredFingerprints = emptySet()
+        biSetSourceId = null
     }
 
     val selectedWorkout = activeWorkouts.firstOrNull { it.id == selectedWorkoutId }
@@ -229,6 +234,8 @@ fun WorkoutsScreen(
         workoutExercises.filter { it.workoutId == workout.id }.sortedBy { it.orderIndex }
     }.orEmpty()
     val exerciseById = exercises.associateBy { it.id }
+    val biSetMemberships = remember(selectedItems) { SupersetPlanner.memberships(selectedItems) }
+    val biSetSource = selectedItems.firstOrNull { it.id == biSetSourceId }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -339,13 +346,59 @@ fun WorkoutsScreen(
                             }
                         }
                     } else {
+                        if (biSetSource != null) {
+                            item(key = "bi-set-selection") {
+                                OutlinedCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                    colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Icon(Icons.Outlined.Link, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                        Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
+                                            Text("Escolha o segundo exercício", fontWeight = FontWeight.Bold)
+                                            Text(
+                                                "${exerciseById[biSetSource.exerciseId]?.name ?: "Exercício"} será o BI-SET A.",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                        TextButton(onClick = { biSetSourceId = null }) { Text("Cancelar") }
+                                    }
+                                }
+                            }
+                        }
                         itemsIndexed(selectedItems, key = { _, item -> item.id }) { index, item ->
+                            val membership = biSetMemberships[item.id]
+                            val partnerItem = membership?.partnerWorkoutExerciseId?.let { partnerId ->
+                                selectedItems.firstOrNull { it.id == partnerId }
+                            }
+                            val partnerName = partnerItem?.exerciseId?.let { exerciseById[it]?.name }
                             WorkoutExerciseCard(
                                 number = index + 1,
                                 item = item,
                                 exercise = exerciseById[item.exerciseId],
                                 canMoveUp = index > 0,
                                 canMoveDown = index < selectedItems.lastIndex,
+                                biSetPosition = membership?.position,
+                                biSetPartnerName = partnerName,
+                                isBiSetSource = biSetSourceId == item.id,
+                                isChoosingBiSetPartner = biSetSourceId != null && biSetSourceId != item.id,
+                                onBiSet = {
+                                    val sourceId = biSetSourceId
+                                    when {
+                                        sourceId != null && sourceId != item.id -> {
+                                            vm.pairWorkoutExercisesAsBiSet(workout.id, sourceId, item.id)
+                                            biSetSourceId = null
+                                        }
+                                        sourceId == item.id -> biSetSourceId = null
+                                        membership != null -> vm.unpairWorkoutBiSet(workout.id, item.id)
+                                        else -> biSetSourceId = item.id
+                                    }
+                                },
                                 onMoveUp = { vm.moveWorkoutExercise(workout.id, item.id, -1) },
                                 onMoveDown = { vm.moveWorkoutExercise(workout.id, item.id, 1) },
                                 onEdit = {
@@ -802,17 +855,27 @@ private fun WorkoutExerciseCard(
     exercise: ExerciseEntity?,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
+    biSetPosition: Int?,
+    biSetPartnerName: String?,
+    isBiSetSource: Boolean,
+    isChoosingBiSetPartner: Boolean,
+    onBiSet: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onEdit: () -> Unit,
     onSubstitute: () -> Unit,
     onRemove: () -> Unit,
 ) {
+    val isPaired = biSetPosition != null
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        color = if (isBiSetSource) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(
+            1.dp,
+            if (isPaired || isBiSetSource) MaterialTheme.colorScheme.primary.copy(alpha = 0.72f)
+            else MaterialTheme.colorScheme.outlineVariant,
+        ),
     ) {
         Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -830,13 +893,42 @@ private fun WorkoutExerciseCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(item.setType.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                    exercise?.let { Text(it.muscleGroup.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    Text(
+                        if (isPaired) "BI-SET ${if (biSetPosition == 1) "A" else "B"} ↔ ${biSetPartnerName ?: "parceiro"}"
+                        else item.setType.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    if (!isPaired) {
+                        exercise?.let { Text(it.muscleGroup.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    }
                 }
-                TextButton(onClick = onSubstitute, contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
-                    Icon(Icons.Outlined.SwapHoriz, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(5.dp))
-                    Text("Substituir")
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = onSubstitute, contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+                        Icon(Icons.Outlined.SwapHoriz, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(5.dp))
+                        Text("Substituir")
+                    }
+                    AssistChip(
+                        onClick = onBiSet,
+                        label = {
+                            Text(
+                                when {
+                                    isBiSetSource -> "Cancelar"
+                                    isChoosingBiSetPartner -> "Juntar"
+                                    isPaired -> "Desfazer"
+                                    else -> "Bi-set"
+                                }
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                if (isPaired && !isChoosingBiSetPartner) Icons.Outlined.LinkOff else Icons.Outlined.Link,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                    )
                 }
                 if (item.notes.isNotBlank()) Text(item.notes, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

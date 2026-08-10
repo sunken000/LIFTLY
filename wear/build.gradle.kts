@@ -11,8 +11,8 @@ android {
         applicationId = "com.liftly.app.wear"
         minSdk = 30
         targetSdk = 36
-        versionCode = 39
-        versionName = "1.6.1"
+        versionCode = 40
+        versionName = "1.6.2"
     }
 
     compileOptions {
