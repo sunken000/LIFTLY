@@ -36,6 +36,7 @@ jobs:
           git apply --check /tmp/training.patch
           git apply /tmp/training.patch
           rm -rf .agent
+          chmod +x gradlew
       - name: Run unit tests
         if: steps.staged.outputs.ready == 'true'
         run: ./gradlew testPersonalDebugUnitTest
