@@ -45,7 +45,6 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Redeem
 import androidx.compose.material.icons.rounded.ShoppingBag
 import androidx.compose.material.icons.rounded.Timer
-import androidx.compose.material.icons.rounded.Verified
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
@@ -101,8 +100,8 @@ import java.util.Locale
  * Complete presentation layer for Liftly Rewards.
  *
  * The screen owns only ephemeral presentation state (open preview and confirmation). Balance,
- * ownership and mission progress always come from [RewardsUiState], making this safe to connect to
- * Room, a remote account or the admin simulator without duplicating business rules here.
+ * ownership and mission progress always come from [RewardsUiState], while persistence and
+ * business rules remain outside the presentation layer.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -184,15 +183,6 @@ fun RewardsScreen(
                     },
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
-            }
-
-            if (state.viewerMode == RewardsViewerMode.AdminPreview) {
-                item {
-                    AdminPreviewBanner(
-                        onOpenPanel = actions.onOpenAdminPanel,
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                    )
-                }
             }
 
             if (state.featuredItems.isNotEmpty()) {
@@ -382,30 +372,6 @@ private fun RewardsAccountCard(
                 )
                 TextButton(onClick = onHistory) { Text("Extrato") }
             }
-        }
-    }
-}
-
-@Composable
-private fun AdminPreviewBanner(onOpenPanel: () -> Unit, modifier: Modifier = Modifier) {
-    InteractiveGlassCard(
-        onClick = onOpenPanel,
-        modifier = modifier.fillMaxWidth(),
-        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        contentPadding = PaddingValues(16.dp),
-        elevation = 0.dp,
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Rounded.Verified, contentDescription = null)
-            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                Text("Visualização administrativa", fontWeight = FontWeight.Bold)
-                Text(
-                    "Abra o painel para simular saldo, compras e conclusão de missões.",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            Icon(Icons.Rounded.KeyboardArrowRight, contentDescription = "Abrir painel administrativo")
         }
     }
 }
@@ -903,7 +869,7 @@ private fun RewardsScreenPreview() {
     LiftlyTheme(themeMode = "preto") {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             RewardsScreen(
-                state = RewardsPreviewData.state.copy(viewerMode = RewardsViewerMode.AdminPreview),
+                state = RewardsPreviewData.state,
                 actions = RewardsActions(),
             )
         }
