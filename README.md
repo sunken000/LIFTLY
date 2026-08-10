@@ -2,81 +2,43 @@
 
 Aplicativo Android nativo, offline-first e em português para montar, organizar e acompanhar treinos de academia. O projeto usa Kotlin, Jetpack Compose, Material Design 3, MVVM, Room, Navigation Compose, Coroutines/StateFlow, DataStore e WorkManager.
 
-## Download — Liftly Pessoal 1.5.2
+## Versão atual — 1.5.3
 
-**Versão atual:** `1.5.2` (`versionCode 34`)  
-**Pacote:** `com.liftly.app`  
-**Android mínimo:** Android 8.0 / API 26
+- **versionName:** `1.5.3`
+- **versionCode:** `35`
+- **applicationId:** `com.liftly.app`
+- **Android mínimo:** Android 8.0 / API 26
+- **targetSdk / compileSdk:** 36
 
-### [Baixar Liftly Pessoal 1.5.2 (.apk)](https://github.com/sunken000/LIFTLY/raw/refs/heads/master/Liftly-Pessoal-v1.5.2.apk)
+O repositório mantém uma única aplicação Android: **Liftly**.
 
-O APK também está disponível diretamente na raiz do repositório como:
+## Novidades da 1.5.3
 
-```text
-Liftly-Pessoal-v1.5.2.apk
-```
+- consolidação do projeto em uma única aplicação;
+- atualização do código Android para `versionName 1.5.3` e `versionCode 35`;
+- simplificação da configuração Gradle para uma única variante principal;
+- limpeza de artefatos e documentação que não fazem parte do aplicativo atual;
+- manutenção dos recursos introduzidos na série 1.5, incluindo Rewards e importação de treinos por texto.
 
-> O APK disponibilizado no repositório é destinado à instalação e avaliação direta. Para publicação em loja, use uma build `release` assinada com uma chave de distribuição própria.
-
-## O que há de novo na série 1.5
-
-### 1.5.2 — Inserção de treino por texto
-
-- a opção de importação passou a se chamar **Inserir texto**;
-- as instruções da tela ficaram neutras;
-- o fluxo continua permitindo analisar, revisar e salvar uma ou várias fichas antes de gravar os dados.
-
-### 1.5.1 — Importador inteligente
-
-Em **Treinos → Importar → Inserir texto**, o Liftly consegue interpretar fichas em texto, listas e tabelas Markdown, preservando a ordem original dos treinos e exercícios.
-
-Quando informados, podem ser reconhecidos nome do treino, dias, exercícios, séries, repetições, carga, descanso, RIR e tipo de série. Antes de salvar, uma prévia permite revisar e corrigir os dados detectados.
-
-### 1.5.0 — Rewards
-
-A versão 1.5 introduziu uma economia local de progressão:
-
-- XP permanente e níveis;
-- Lift Coins;
-- missões diárias, semanais e mensais;
-- recompensas por treino, ficha completa, RIR e recordes pessoais;
-- loja de personalização;
-- inventário de cosméticos;
-- temas, wallpapers, molduras, sons de descanso e títulos de perfil;
-- extrato de ganhos, compras e ajustes;
-- proteção contra recompensa duplicada para a mesma sessão;
-- modo teste sem impacto em progresso, missões, XP ou Lift Coins.
-
-## Edições do projeto
-
-O projeto possui três flavors Android:
-
-| Edição | Application ID | Versão | Finalidade |
-|---|---|---:|---|
-| **Personal** | `com.liftly.app` | `1.5.2` | experiência normal, sem ferramentas administrativas |
-| **Business** | `com.liftly.app.business` | `1.0.0` | prévia comercial e fundação para Google Play Billing |
-| **Admin** | `com.liftly.app.admin` | `1.5.2-admin` | validação da economia e simulações de teste |
-
-Na raiz do repositório estão disponíveis os APKs **Personal 1.5.2** e **Admin 1.5.2**. A edição Business pode ser compilada a partir do código-fonte.
-
-## Principais recursos
+## Recursos principais
 
 - onboarding curto, pulável, com treino de demonstração opcional;
 - áreas principais para Hoje, Treinos, Exercícios, Progresso, Cronômetro, Música e Perfil;
 - criação, edição, duplicação, arquivamento e exclusão de treinos;
 - catálogo offline com 263 exercícios;
+- busca sem exigir acentos ou correspondência de maiúsculas/minúsculas;
 - exercícios personalizados e favoritos;
 - planejamento semanal com múltiplos treinos e dias de descanso;
-- importação de fichas por texto com revisão antes de salvar;
+- importação de fichas por texto, listas e tabelas Markdown com revisão antes de salvar;
 - sessão de treino persistente;
 - registro de séries, repetições, carga, duração, distância, RIR e dor percebida;
 - coach de progressão local com progressão dupla, histórico, RIR e salvaguardas de dor/deload;
-- modo teste que executa a ficha e descarta os resultados ao finalizar;
+- modo teste que executa o treino e descarta a sessão ao finalizar;
 - cronômetro de descanso flutuante com notificação, vibração e alarme opcionais;
 - cronômetro geral com pausar, retomar, zerar e voltas;
 - histórico detalhado de treinos;
 - histórico de carga, volume, frequência e peso corporal;
-- ranking pessoal por recordes/e1RM;
+- ranking por recordes/e1RM;
 - metas semanais e sequência de semanas cumpridas;
 - sistema de XP, Lift Coins, missões, loja e inventário;
 - calculadora de IMC com referências por faixa etária;
@@ -84,47 +46,62 @@ Na raiz do repositório estão disponíveis os APKs **Personal 1.5.2** e **Admin
 - integração opcional com Health Connect;
 - foto de perfil e linha do tempo privada de fotos corporais;
 - widget de tela inicial com treino do dia;
-- exportação opcional de resumo de treino para Discord;
+- envio opcional de resumo de treino para Discord;
 - biblioteca local de links de playlists e abertura no Spotify;
-- temas Roxo Neon, Branco suave e Preto OLED, além de cosméticos desbloqueáveis;
+- temas e cosméticos desbloqueáveis;
 - exportação e importação de backup JSON;
-- compartilhamento de fichas por arquivo do Liftly, QR Code e PDF;
+- compartilhamento de fichas por arquivo, QR Code e PDF;
 - exclusão dos dados pessoais armazenados localmente.
 
-As sugestões de treino, o IMC e as calorias são informações gerais. As estimativas não substituem avaliação de profissionais de educação física ou saúde.
+As sugestões de treino, o IMC e as estimativas de calorias são informações gerais e não substituem avaliação profissional.
+
+## Rewards
+
+A série 1.5 inclui uma economia local de progressão:
+
+- XP permanente e níveis;
+- Lift Coins;
+- missões diárias, semanais e mensais;
+- recompensas por conclusão de treino, ficha completa, RIR e recordes pessoais;
+- loja de personalização;
+- inventário de cosméticos;
+- temas, wallpapers, molduras, sons de descanso e títulos de perfil;
+- extrato de ganhos e compras;
+- proteção contra recompensa duplicada para a mesma sessão;
+- modo teste sem impacto em progresso, missões, XP ou Lift Coins.
+
+## Importar treinos por texto
+
+Abra **Treinos → Importar → Inserir texto**. O Liftly interpreta formatos comuns em português, incluindo listas e tabelas Markdown.
+
+Quando presentes no texto, podem ser reconhecidos:
+
+- nome do treino;
+- dias;
+- exercícios;
+- séries;
+- repetições;
+- carga;
+- descanso;
+- RIR;
+- tipo de série.
+
+Antes de salvar, uma prévia permite revisar e corrigir os dados detectados.
 
 ## Privacidade e funcionamento offline
 
 Os dados de treino e saúde permanecem no dispositivo. Conta e conexão com a internet não são necessárias para as funções principais.
 
-A rede é usada apenas em recursos opcionais, como:
+A rede é usada somente por integrações opcionais, como:
 
-- integração com Discord;
-- carregamento/abertura de conteúdo da aba Música;
-- configuração remota opcional da playlist pública.
+- Discord;
+- conteúdo da aba Música;
+- configuração remota opcional da playlist pública;
+- Health Connect, conforme disponibilidade e permissões do dispositivo.
 
 O Liftly não conecta contas do Spotify nem armazena tokens do Spotify. Não há anúncios, analytics ou telemetria. O backup JSON exportado não é criptografado e deve ser guardado em local protegido.
 
 Consulte [Backup e privacidade](docs/BACKUP_E_PRIVACIDADE.md) para os detalhes.
-
-## Instalar o APK pessoal
-
-### Pelo próprio Android
-
-1. Baixe o arquivo **Liftly-Pessoal-v1.5.2.apk** pelo link no início deste README.
-2. Abra o APK no dispositivo.
-3. Quando solicitado, autorize a instalação de aplicativos pela origem usada para abrir o arquivo.
-4. Conclua a instalação.
-
-### Com ADB
-
-Com a depuração USB ativada:
-
-```bash
-adb install -r Liftly-Pessoal-v1.5.2.apk
-```
-
-A opção `-r` permite atualizar uma instalação existente preservando os dados do aplicativo, desde que a assinatura seja compatível.
 
 ## Requisitos de desenvolvimento
 
@@ -141,7 +118,7 @@ O projeto inclui Gradle Wrapper 9.4.1.
 1. Abra a pasta raiz `LIFTLY` no Android Studio.
 2. Configure o Gradle para usar JDK 17 ou superior.
 3. Aguarde a sincronização do projeto.
-4. Selecione a variante desejada.
+4. Selecione a configuração `app`.
 5. Execute em um dispositivo ou emulador com API 26 ou superior.
 
 ## Compilar pela linha de comando
@@ -149,54 +126,58 @@ O projeto inclui Gradle Wrapper 9.4.1.
 ### Windows PowerShell
 
 ```powershell
-.\gradlew.bat assemblePersonalDebug
-```
-
-Para gerar todas as variantes de depuração:
-
-```powershell
-.\gradlew.bat assemblePersonalDebug assembleBusinessDebug assembleAdminDebug
+.\gradlew.bat assembleDebug
 ```
 
 ### macOS / Linux
 
 ```bash
-./gradlew assemblePersonalDebug
+./gradlew assembleDebug
 ```
 
-Para gerar todas as variantes de depuração:
-
-```bash
-./gradlew assemblePersonalDebug assembleBusinessDebug assembleAdminDebug
-```
-
-O APK Personal gerado pelo Gradle fica em:
+O APK de depuração gerado fica em:
 
 ```text
-app/build/outputs/apk/personal/debug/app-personal-debug.apk
+app/build/outputs/apk/debug/app-debug.apk
 ```
+
+Para uma distribuição pública, configure assinatura própria e gere uma build `release`.
+
+## Instalar com ADB
+
+Depois de compilar:
+
+```bash
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+A opção `-r` preserva os dados somente quando a assinatura do APK é compatível com a instalação existente.
 
 ## Testes e verificações
 
-Para a edição Personal:
-
 ```powershell
-.\gradlew.bat testPersonalDebugUnitTest
-.\gradlew.bat lintPersonalDebug
-.\gradlew.bat assemblePersonalDebug
+.\gradlew.bat testDebugUnitTest
+.\gradlew.bat lintDebug
+.\gradlew.bat assembleDebug
 ```
 
-Testes instrumentados exigem um emulador ou dispositivo conectado. Consulte [Testes e limitações](docs/TESTES_E_LIMITACOES.md) para o checklist do projeto.
+Testes instrumentados exigem um dispositivo ou emulador conectado:
+
+```powershell
+.\gradlew.bat connectedDebugAndroidTest
+```
+
+Consulte [Testes e limitações](docs/TESTES_E_LIMITACOES.md) para o checklist do projeto.
 
 ## Publicar atualizações no Discord
 
-O projeto inclui `tools/discord_publish.ps1`. O script lê o webhook apenas da variável de ambiente `LIFTLY_DISCORD_WEBHOOK_URL`.
+O projeto inclui `tools/discord_publish.ps1`. O webhook é lido exclusivamente da variável de ambiente `LIFTLY_DISCORD_WEBHOOK_URL`.
 
 Exemplo:
 
 ```powershell
 $env:LIFTLY_DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/SEU_ID/SEU_TOKEN"
-.\tools\discord_publish.ps1 -Message "Liftly Pessoal 1.5.2." -Files @("Liftly-Pessoal-v1.5.2.apk", "README.md")
+.\tools\discord_publish.ps1 -Message "Liftly 1.5.3." -Files @("README.md")
 Remove-Item Env:LIFTLY_DISCORD_WEBHOOK_URL
 ```
 
@@ -213,14 +194,14 @@ Nunca coloque o webhook no código, no APK ou no Git.
 ```text
 app/src/main/java/com/liftly/app/
 ├── data/         Room, DAO, catálogo, repositório e DataStore
-├── domain/       IMC, calorias, coach, progressão e rewards
+├── domain/       IMC, calorias, coach, progressão e Rewards
 ├── integration/ Discord, Música e integrações opcionais
 ├── service/      notificações, metas e descanso em segundo plano
 ├── widget/       widget do treino de hoje
 └── ui/           ViewModel, navegação, telas, tema e componentes Compose
 ```
 
-A arquitetura e o fluxo de dados estão detalhados em [docs/ARQUITETURA.md](docs/ARQUITETURA.md). O esquema Room completo está em [docs/BANCO_DE_DADOS.md](docs/BANCO_DE_DADOS.md).
+A arquitetura e o fluxo de dados estão detalhados em [docs/ARQUITETURA.md](docs/ARQUITETURA.md). O esquema Room está em [docs/BANCO_DE_DADOS.md](docs/BANCO_DE_DADOS.md).
 
 ## Documentação
 
@@ -231,8 +212,5 @@ A arquitetura e o fluxo de dados estão detalhados em [docs/ARQUITETURA.md](docs
 - [Patch notes 1.5.0](docs/PATCH_NOTES_1.5.0.md)
 - [Patch notes 1.5.1](docs/PATCH_NOTES_1.5.1.md)
 - [Patch notes 1.5.2](docs/PATCH_NOTES_1.5.2.md)
+- [Patch notes 1.5.3](docs/PATCH_NOTES_1.5.3.md)
 - [Checklist de testes e limitações](docs/TESTES_E_LIMITACOES.md)
-
-## Licença e distribuição
-
-Antes de redistribuir ou publicar o aplicativo em lojas, revise as dependências, a política de privacidade, a assinatura da build e os requisitos da plataforma de distribuição utilizada.
