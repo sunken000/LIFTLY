@@ -34,11 +34,6 @@ enum class MissionPeriod(val label: String) {
     Monthly("Mês"),
 }
 
-enum class RewardsViewerMode {
-    User,
-    AdminPreview,
-}
-
 @Immutable
 data class RewardsAccountUi(
     val level: Int,
@@ -105,7 +100,6 @@ data class RewardsUiState(
     val activity: List<RewardActivityUi> = emptyList(),
     val selectedCategory: RewardCategory = RewardCategory.All,
     val selectedMissionPeriod: MissionPeriod = MissionPeriod.Daily,
-    val viewerMode: RewardsViewerMode = RewardsViewerMode.User,
     val isLoading: Boolean = false,
 ) {
     val featuredItems: List<RewardItemUi> get() = items.filter(RewardItemUi::featured)
@@ -128,7 +122,6 @@ data class RewardsActions(
     val onClaimMission: (RewardMissionUi) -> Unit = {},
     val onOpenHistory: () -> Unit = {},
     val onOpenInventory: () -> Unit = {},
-    val onOpenAdminPanel: () -> Unit = {},
 )
 
 /** Preview data doubles as a concise contract example for the eventual ViewModel mapper. */
