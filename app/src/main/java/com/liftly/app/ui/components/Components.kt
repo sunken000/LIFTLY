@@ -716,7 +716,7 @@ fun InteractiveGlassCard(
     containerColor: Color = Color.Unspecified,
     contentColor: Color = Color.Unspecified,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    elevation: androidx.compose.ui.unit.Dp = 7.dp,
+    elevation: androidx.compose.ui.unit.Dp = 2.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
