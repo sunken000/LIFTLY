@@ -1,16 +1,24 @@
-# Liftly 1.5.3 — Atualização da build pessoal
+# Liftly 1.5.3 — Consolidação do aplicativo
 
-Esta entrada registra a nova atualização do **Liftly Pessoal** fornecida para distribuição em 10 de agosto de 2026.
+Versão registrada em 10 de agosto de 2026.
 
-## Build atualizada
+## Versionamento
 
-- Nova build pessoal recebida como `Liftly-training-improvements-personal-debug.apk`.
-- A atualização passa a ser identificada nos logs e patch notes do projeto como **Liftly 1.5.3**.
-- O pacote Android permanece `com.liftly.app`.
-- Esta atualização substitui a build pessoal anterior como referência de desenvolvimento/distribuição.
+- `versionName`: **1.5.3**
+- `versionCode`: **35**
+- `applicationId`: `com.liftly.app`
+- Android mínimo: API 26
+- target/compile SDK: 36
 
-## Observação técnica
+## Alterações desta entrega
 
-O APK recebido ainda declara internamente `versionName 1.5.2`. Portanto, **1.5.3 é o número registrado para esta atualização nos logs**, enquanto o `versionName` do binário só passará a mostrar `1.5.3` depois de uma nova compilação com o versionamento do projeto incrementado.
+- projeto consolidado em uma única aplicação chamada **Liftly**;
+- configuração Gradle simplificada para a variante principal `debug`/`release`;
+- artefatos antigos e documentação fora do escopo da aplicação atual removidos;
+- estrutura do repositório reduzida para manter o foco no Liftly;
+- comandos de build e testes atualizados para `assembleDebug`, `testDebugUnitTest` e `lintDebug`;
+- recursos da série 1.5 preservados, incluindo XP, Lift Coins, missões, loja, inventário e importação de fichas por texto.
 
-Nenhuma alteração funcional específica é descrita aqui além das melhorias presentes na build fornecida, pois o APK não contém um changelog autoral detalhando cada modificação realizada.
+## Compatibilidade
+
+O pacote Android continua sendo `com.liftly.app`. Para instalar uma nova build sobre uma instalação existente sem apagar dados, o APK precisa ser assinado com uma chave compatível com a instalação anterior.
