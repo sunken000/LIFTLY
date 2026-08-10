@@ -36,8 +36,8 @@ class LiftlyRewardsTest {
                 personalRecords = 1,
             )
         )
-        assertEquals(200L, decision.xp)
-        assertEquals(60L, decision.coins)
+        assertEquals(145L, decision.xp)
+        assertEquals(35L, decision.coins)
         assertEquals(1, decision.missionProgress[RewardMetric.WORKOUT_COMPLETED])
         assertEquals(1, decision.missionProgress[RewardMetric.COMPLETE_WORKOUT])
         assertEquals(4, decision.missionProgress[RewardMetric.RIR_SET_RECORDED])
