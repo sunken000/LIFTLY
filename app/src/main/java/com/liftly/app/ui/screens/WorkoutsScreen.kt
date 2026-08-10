@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -63,6 +64,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -584,53 +586,53 @@ fun WorkoutsScreen(
 
 @Composable
 private fun WorkoutSelectorCard(workout: WorkoutEntity, selected: Boolean, exerciseCount: Int, onClick: () -> Unit) {
-    OutlinedCard(
+    Surface(
         onClick = onClick,
-        modifier = Modifier.width(148.dp),
-        colors = CardDefaults.outlinedCardColors(
-            containerColor = if (selected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerLow
-            },
-        ),
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-        ),
+        modifier = Modifier.width(164.dp),
+        shape = MaterialTheme.shapes.large,
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(workout.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Text(
-                "$exerciseCount ${if (exerciseCount == 1) "exercício" else "exercícios"}",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.width(3.dp).height(38.dp).background(
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    CircleShape,
+                ),
             )
+            Column(Modifier.padding(start = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    if (selected) "EM FOCO" else "TREINO",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(workout.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1)
+                Text(
+                    "$exerciseCount ${if (exerciseCount == 1) "exercício" else "exercícios"}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun ImportWorkoutCard(onClick: () -> Unit) {
-    OutlinedCard(
+    Surface(
         onClick = onClick,
-        modifier = Modifier.width(148.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)),
+        modifier = Modifier.width(164.dp),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.FileDownload, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.width(6.dp))
-                Text("Importar", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.FileDownload, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Column(Modifier.padding(start = 10.dp)) {
+                Text("IMPORTAR", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Text("Texto, arquivo ou QR", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text("Texto, arquivo ou QR", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -754,43 +756,40 @@ private fun WorkoutHeader(
     onArchive: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    OutlinedCard(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.48f)),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.Top) {
-                Column(Modifier.weight(1f)) {
-                    Text(workout.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+                Box(Modifier.width(4.dp).height(58.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
+                Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                    Text("FICHA ATIVA", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text(workout.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
                     if (workout.description.isNotBlank()) {
-                        Text(
-                            workout.description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Text(workout.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
                 IconButton(onClick = onEdit) { Icon(Icons.Outlined.Edit, contentDescription = "Editar ${workout.name}") }
             }
-            Text(
-                "$itemCount ${if (itemCount == 1) "exercício" else "exercícios"}  •  ${formatDays(workout.weekDays)}",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                Column {
+                    Text(itemCount.toString(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                    Text("EXERCÍCIOS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Column {
+                    Text(formatDays(workout.weekDays), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text("AGENDA", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                item {
-                    AssistChip(onClick = onShare, label = { Text("Compartilhar") }, leadingIcon = { Icon(Icons.Outlined.Share, contentDescription = null) })
-                }
-                item {
-                    AssistChip(onClick = onDuplicate, label = { Text("Duplicar") }, leadingIcon = { Icon(Icons.Outlined.ContentCopy, contentDescription = null) })
-                }
-                item {
-                    AssistChip(onClick = onArchive, label = { Text("Arquivar") }, leadingIcon = { Icon(Icons.Outlined.Archive, contentDescription = null) })
-                }
-                item {
-                    AssistChip(onClick = onDelete, label = { Text("Excluir") }, leadingIcon = { Icon(Icons.Outlined.DeleteOutline, contentDescription = null) })
-                }
+                item { AssistChip(onClick = onShare, label = { Text("Compartilhar") }, leadingIcon = { Icon(Icons.Outlined.Share, contentDescription = null) }) }
+                item { AssistChip(onClick = onDuplicate, label = { Text("Duplicar") }, leadingIcon = { Icon(Icons.Outlined.ContentCopy, contentDescription = null) }) }
+                item { AssistChip(onClick = onArchive, label = { Text("Arquivar") }, leadingIcon = { Icon(Icons.Outlined.Archive, contentDescription = null) }) }
+                item { AssistChip(onClick = onDelete, label = { Text("Excluir") }, leadingIcon = { Icon(Icons.Outlined.DeleteOutline, contentDescription = null) }) }
             }
         }
     }
@@ -809,53 +808,41 @@ private fun WorkoutExerciseCard(
     onSubstitute: () -> Unit,
     onRemove: () -> Unit,
 ) {
-    OutlinedCard(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Row(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    "$number",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            Spacer(Modifier.width(10.dp))
+        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                number.toString().padStart(2, '0'),
+                modifier = Modifier.width(42.dp),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Black,
+            )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(exercise?.name ?: "Exercício indisponível", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(exercise?.name ?: "Exercício indisponível", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
-                    "${item.sets} × ${if (item.repMin == item.repMax) item.repMin else "${item.repMin}–${item.repMax}"} ${if (item.trackingMode == "Tempo") "s" else if (item.trackingMode == "Distância") "m" else "reps"} • ${formatLoad(item.targetLoadKg)} • ${item.restSeconds}s",
+                    "${item.sets} × ${if (item.repMin == item.repMax) item.repMin else "${item.repMin}–${item.repMax}"} ${if (item.trackingMode == "Tempo") "s" else if (item.trackingMode == "Distância") "m" else "reps"}  /  ${formatLoad(item.targetLoadKg)}  /  ${item.restSeconds}s",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(item.setType, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                    exercise?.let { Text(it.muscleGroup, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    Text(item.setType.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    exercise?.let { Text(it.muscleGroup.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
-                TextButton(
-                    onClick = onSubstitute,
-                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
-                ) {
+                TextButton(onClick = onSubstitute, contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
                     Icon(Icons.Outlined.SwapHoriz, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(5.dp))
-                    Text("Substituir exercício")
+                    Text("Substituir")
                 }
                 if (item.notes.isNotBlank()) Text(item.notes, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Column {
-                IconButton(enabled = canMoveUp, onClick = onMoveUp) {
-                    Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = "Mover ${exercise?.name ?: "exercício"} para cima")
-                }
-                IconButton(enabled = canMoveDown, onClick = onMoveDown) {
-                    Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = "Mover ${exercise?.name ?: "exercício"} para baixo")
-                }
+                IconButton(enabled = canMoveUp, onClick = onMoveUp) { Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = "Mover ${exercise?.name ?: "exercício"} para cima") }
+                IconButton(enabled = canMoveDown, onClick = onMoveDown) { Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = "Mover ${exercise?.name ?: "exercício"} para baixo") }
             }
             Column {
                 IconButton(onClick = onEdit) { Icon(Icons.Outlined.Edit, contentDescription = "Configurar ${exercise?.name ?: "exercício"}") }

@@ -87,14 +87,18 @@ fun OnboardingScreen(onFinish: (Boolean) -> Unit) {
             } else Spacer(Modifier.height(156.dp))
             Spacer(Modifier.height(32.dp))
             AnimatedContent(page, label = "onboarding") { index ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Box(Modifier.size(64.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                        NeonIcon(pages[index].icon, null, selected = true, intensity = 0f, size = 48.dp)
-                    }
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Text(
+                        "0${index + 1}",
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.48f),
+                    )
+                    NeonIcon(pages[index].icon, null, selected = true, intensity = 0f, size = 42.dp)
                     Text(
                         pages[index].title,
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onBackground,
                     )

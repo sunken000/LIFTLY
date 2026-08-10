@@ -2,6 +2,7 @@ package com.liftly.app.ui
 
 import android.app.Activity
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -106,8 +108,6 @@ private val mainDestinations = listOf(
     MainDestination("workouts", "Treinos", Icons.Default.CalendarToday),
     MainDestination("exercises", "Exercícios", Icons.Default.FitnessCenter),
     MainDestination("progress", "Progresso", Icons.Default.Insights),
-    MainDestination("stopwatch", "Cronômetro", Icons.Default.Timer),
-    MainDestination("music", "Música", Icons.Default.LibraryMusic),
     MainDestination("profile", "Perfil", Icons.Default.Person),
 )
 
@@ -188,7 +188,7 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
-    val showBar = route in mainDestinations.map { it.route }
+    val showBar = route in mainDestinations.map { it.route } || route == "stopwatch" || route == "music"
     val snackbar = remember { SnackbarHostState() }
     val feedback by vm.feedback.collectAsStateWithLifecycle()
     val prefs by vm.preferences.collectAsStateWithLifecycle()
@@ -258,7 +258,7 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                                 val selected = route == destination.route
                                 NavigationBarItem(
                                     selected = selected,
-                                    alwaysShowLabel = false,
+                                    alwaysShowLabel = true,
                                     onClick = {
                                         navController.navigate(destination.route) {
                                             popUpTo(navController.graph.findStartDestination().id) {
@@ -269,13 +269,26 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                                         }
                                     },
                                     icon = {
-                                        NeonIcon(
-                                            imageVector = destination.icon,
-                                            contentDescription = destination.label,
-                                            selected = selected,
-                                            intensity = 0f,
-                                            size = 25.dp,
-                                        )
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        ) {
+                                            Box(
+                                                Modifier
+                                                    .size(width = 20.dp, height = 3.dp)
+                                                    .background(
+                                                        if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                                        MaterialTheme.shapes.extraSmall,
+                                                    ),
+                                            )
+                                            NeonIcon(
+                                                imageVector = destination.icon,
+                                                contentDescription = destination.label,
+                                                selected = selected,
+                                                intensity = 0f,
+                                                size = 24.dp,
+                                            )
+                                        }
                                     },
                                     label = {
                                         Text(
@@ -284,7 +297,7 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                                             overflow = TextOverflow.Ellipsis,
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 10.sp,
-                                                lineHeight = 12.sp,
+                                                lineHeight = 13.sp,
                                             ),
                                             fontWeight = FontWeight.SemiBold,
                                         )
@@ -292,7 +305,7 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                                     colors = NavigationBarItemDefaults.colors(
                                         selectedIconColor = MaterialTheme.colorScheme.primary,
                                         selectedTextColor = MaterialTheme.colorScheme.primary,
-                                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                                        indicatorColor = Color.Transparent,
                                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                     ),
@@ -323,6 +336,8 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                     onOpenSession = { id -> openSession(id, automaticWarmup = false) },
                     onOpenWarmupSession = { id -> openSession(id, automaticWarmup = true) },
                     onOpenCalendar = { navController.navigate("calendar") },
+                    onOpenStopwatch = { navController.navigate("stopwatch") },
+                    onOpenMusic = { navController.navigate("music") },
                 )
             }
             composable("workouts") {

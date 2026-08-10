@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.5.5 — 2026-08-10
+
+- `versionName` atualizado para **1.5.5**.
+- `versionCode` atualizado para **37**.
+- Introduzida a identidade visual **Liftline**.
+- Navegação principal reduzida para cinco destinos; Cronômetro e Música continuam disponíveis pela tela Hoje.
+- Hoje, Treinos e Progresso receberam mudanças estruturais de composição e hierarquia.
+- Cantos assimétricos, linha de força e numeração editorial passam a funcionar como assinatura visual recorrente.
+- CTAs deixam de depender de gradiente e passam a usar cor sólida de marca.
+- Nenhuma alteração de banco de dados ou remoção de funcionalidade.
+
+Detalhes: [Patch notes 1.5.5](docs/PATCH_NOTES_1.5.5.md).
+
 ## 1.5.4 — 2026-08-10
 
 - `versionName` atualizado para **1.5.4**.
@@ -25,6 +38,7 @@ Detalhes: [Patch notes 1.5.3](docs/PATCH_NOTES_1.5.3.md).
 
 ## Histórico 1.5
 
+- [1.5.5](docs/PATCH_NOTES_1.5.5.md)
 - [1.5.4](docs/PATCH_NOTES_1.5.4.md)
 - [1.5.3](docs/PATCH_NOTES_1.5.3.md)
 - [1.5.2](docs/PATCH_NOTES_1.5.2.md)

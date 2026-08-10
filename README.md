@@ -2,34 +2,36 @@
 
 Aplicativo Android nativo, offline-first e em português para montar, organizar e acompanhar treinos de academia. O projeto usa Kotlin, Jetpack Compose, Material Design 3, MVVM, Room, Navigation Compose, Coroutines/StateFlow, DataStore e WorkManager.
 
-## Versão atual — 1.5.4
+## Versão atual — 1.5.5
 
-- **versionName:** `1.5.4`
-- **versionCode:** `36`
+- **versionName:** `1.5.5`
+- **versionCode:** `37`
 - **applicationId:** `com.liftly.app`
 - **Android mínimo:** Android 8.0 / API 26
 - **targetSdk / compileSdk:** 36
 
 O repositório mantém uma única aplicação Android: **Liftly**.
 
-## Novidades da 1.5.4
+## Novidades da 1.5.5
 
-A 1.5.4 faz um refinamento da identidade visual sem alterar a estrutura do produto:
+A 1.5.5 introduz a identidade visual **Liftline**, com mudanças de composição — não apenas de paleta:
 
-- roxo principal menos saturado e mais sóbrio;
-- superfícies mais opacas, reduzindo o aspecto de glassmorphism genérico;
-- tons secundários mais neutros para deixar métricas, textos e estados funcionais dominarem a hierarquia;
-- tema claro com fundo mais neutro e menos lilás;
-- tema OLED com superfícies mais discretas;
-- brilho ambiental e cores de apoio menos chamativos;
-- manutenção da assinatura violeta do Liftly sem transformar cada elemento em destaque visual.
+- cinco destinos principais na navegação: Hoje, Treinos, Exercícios, Progresso e Perfil;
+- Cronômetro e Música preservados como ferramentas contextuais acessíveis pela tela Hoje;
+- tela Hoje reconstruída como dashboard editorial, com plano do dia, métricas e sequência numerada;
+- Treinos com seleção focada, cabeçalho de ficha e exercícios numerados pela mesma linguagem visual;
+- Progresso com leitura de dashboard, números maiores e painéis de dados sólidos;
+- cantos assimétricos usados como assinatura recorrente do produto;
+- violeta Liftly mais vivo sobre superfícies escuras sólidas, com tom quente reservado a estados pontuais;
+- botões principais sólidos e tipografia mais pesada em títulos e métricas;
+- onboarding numerado para reforçar a mesma identidade desde a primeira abertura.
 
-A direção segue o sistema de tema do Material 3: cor, tipografia e formas continuam centralizadas no `MaterialTheme`, enquanto os componentes específicos do Liftly usam os mesmos tokens de forma consistente.
+A identidade evita depender de glassmorphism, halos e gradientes genéricos. O padrão visual passa a ser reconhecido por forma, ritmo, hierarquia e composição.
 
 ## Recursos principais
 
 - onboarding curto, pulável, com treino de demonstração opcional;
-- áreas principais para Hoje, Treinos, Exercícios, Progresso, Cronômetro, Música e Perfil;
+- áreas principais para Hoje, Treinos, Exercícios, Progresso e Perfil, com Cronômetro e Música como ferramentas contextuais;
 - criação, edição, duplicação, arquivamento e exclusão de treinos;
 - catálogo offline com 263 exercícios;
 - busca sem exigir acentos ou correspondência de maiúsculas/minúsculas;

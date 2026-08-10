@@ -37,6 +37,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.SwapHoriz
@@ -50,6 +52,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -127,6 +130,8 @@ fun TodayScreen(
     onOpenSession: (String) -> Unit,
     onOpenWarmupSession: (String) -> Unit,
     onOpenCalendar: () -> Unit,
+    onOpenStopwatch: () -> Unit,
+    onOpenMusic: () -> Unit,
 ) {
     val workouts by vm.workouts.collectAsStateWithLifecycle()
     val schedule by vm.schedule.collectAsStateWithLifecycle()
@@ -163,221 +168,261 @@ fun TodayScreen(
         }
     }
 
-    Scaffold(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onBackground, topBar = {
-        TopAppBar(
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                titleContentColor = MaterialTheme.colorScheme.onBackground,
-                navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-            ),
-            title = {
-            Column {
-                Text("Hoje", fontWeight = FontWeight.Bold)
-                Text(
-                    today.format(DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale.forLanguageTag("pt-BR"))).replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            }
-        )
-    }) { padding ->
+    Scaffold(
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+    ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            contentPadding = PaddingValues(top = 22.dp, bottom = 112.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             item {
-                Spacer(Modifier.height(4.dp))
-                if (active != null) {
-                    GlassCard(containerColor = if (active.isTestMode) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer) {
-                        Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(28.dp), strokeWidth = 3.dp)
-                            Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
-                                Text(if (active.isTestMode) "Teste em andamento" else "Treino em andamento", style = MaterialTheme.typography.labelLarge)
-                                Text(active.workoutName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                                if (active.isTestMode) Text("Será descartado ao finalizar", style = MaterialTheme.typography.bodySmall)
-                            }
-                            GradientActionButton(
-                                onClick = {
-                                    runWithWorkoutNotificationPermission {
-                                        if (active.id in automaticWarmupSessions) onOpenWarmupSession(active.id)
-                                        else onOpenSession(active.id)
-                                    }
-                                },
-                                onClickLabel = "Retomar treino",
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            ) { Text("Retomar") }
-                        }
-                    }
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        "LIFTLY / HOJE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        today.format(DateTimeFormatter.ofPattern("EEEE", Locale.forLanguageTag("pt-BR")))
+                            .replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Black,
+                    )
+                    Text(
+                        today.format(DateTimeFormatter.ofPattern("d 'de' MMMM", Locale.forLanguageTag("pt-BR"))),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
-            if (workout == null) {
-                item {
-                    EmptyToday(onOpenCalendar)
+
+            item {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TodayQuickAction(Icons.Default.CalendarMonth, "Planejar", onOpenCalendar, Modifier.weight(1f))
+                    TodayQuickAction(Icons.Default.Timer, "Cronômetro", onOpenStopwatch, Modifier.weight(1f))
+                    TodayQuickAction(Icons.Default.LibraryMusic, "Música", onOpenMusic, Modifier.weight(1f))
                 }
-            } else {
+            }
+
+            if (active != null) {
                 item {
-                    GlassCard {
-                        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text(
-                                "Treino de hoje",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Text(workout.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                            if (workout.description.isNotBlank()) Text(workout.description, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("${workoutItems.size} exercícios • ${workoutItems.sumOf { it.sets }} séries", style = MaterialTheme.typography.labelLarge)
-                            GradientActionButton(
-                                onClick = {
-                                    runWithWorkoutNotificationPermission {
-                                        vm.startSession(
-                                            workoutId = workout.id,
-                                            automaticWarmup = true,
-                                            onStarted = onOpenWarmupSession,
-                                        )
-                                    }
-                                },
-                                enabled = workoutItems.isNotEmpty() && active == null,
-                                modifier = Modifier.fillMaxWidth(),
-                                onClickLabel = "Preparar aquecimento automático para ${workout.name}",
-                            ) {
-                                Icon(Icons.Default.PlayArrow, null)
-                                Text("Iniciar treino")
-                            }
-                            OutlinedButton(
-                                onClick = {
-                                    runWithWorkoutNotificationPermission {
-                                        vm.startSession(workout.id, onStarted = onOpenSession)
-                                    }
-                                },
-                                enabled = workoutItems.isNotEmpty() && active == null,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text("Pular aquecimento")
-                            }
-                            TextButton(
-                                onClick = {
-                                    runWithWorkoutNotificationPermission {
-                                        vm.startTestSession(workout.id, onOpenSession)
-                                    }
-                                },
-                                enabled = workoutItems.isNotEmpty() && active == null,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(Icons.Default.Science, null)
-                                Text("Testar sem salvar", Modifier.padding(start = 8.dp))
-                            }
-                            Text(
-                                "O aquecimento entra antes de cada exercício. O modo teste não altera seu progresso.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            "Sequência do treino",
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            "${workoutItems.size} exercícios",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-                itemsIndexed(workoutItems, key = { _, item -> item.id }) { index, item ->
-                    val exercise = exercises.firstOrNull { it.id == item.exerciseId }
                     Surface(
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        shape = RoundedCornerShape(16.dp),
+                        onClick = {
+                            runWithWorkoutNotificationPermission {
+                                if (active.id in automaticWarmupSessions) onOpenWarmupSession(active.id)
+                                else onOpenSession(active.id)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.large,
+                        color = if (active.isTestMode) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
                         border = BorderStroke(
                             1.dp,
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.72f),
+                            if (active.isTestMode) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                         ),
                     ) {
                         Row(
-                            Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 13.dp),
+                            Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 15.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Box(
-                                Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    "${index + 1}",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                )
-                            }
+                                Modifier.width(4.dp).height(42.dp).background(
+                                    if (active.isTestMode) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                                    CircleShape,
+                                ),
+                            )
                             Column(Modifier.weight(1f).padding(start = 12.dp)) {
                                 Text(
+                                    if (active.isTestMode) "MODO TESTE / AO VIVO" else "TREINO / AO VIVO",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    active.workoutName,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Black,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            Text("RETOMAR", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+
+            if (workout == null) {
+                item { EmptyToday(onOpenCalendar) }
+            } else {
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.extraLarge,
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)),
+                    ) {
+                        Column(Modifier.fillMaxWidth().padding(22.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    "PLANO DO DIA",
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text("PRONTO", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
+                            }
+                            Text(workout.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                            if (workout.description.isNotBlank()) {
+                                Text(workout.description, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                            }
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                                TodayMetric("EXERCÍCIOS", workoutItems.size.toString(), Modifier.weight(1f))
+                                TodayMetric("SÉRIES", workoutItems.sumOf { it.sets }.toString(), Modifier.weight(1f))
+                            }
+                            GradientActionButton(
+                                onClick = {
+                                    runWithWorkoutNotificationPermission {
+                                        vm.startSession(workoutId = workout.id, automaticWarmup = true, onStarted = onOpenWarmupSession)
+                                    }
+                                },
+                                enabled = workoutItems.isNotEmpty() && active == null,
+                                modifier = Modifier.fillMaxWidth(),
+                                onClickLabel = "Iniciar ${workout.name}",
+                            ) {
+                                Icon(Icons.Default.PlayArrow, null)
+                                Text("Iniciar treino", fontWeight = FontWeight.Bold)
+                            }
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                TextButton(
+                                    onClick = {
+                                        runWithWorkoutNotificationPermission { vm.startSession(workout.id, onStarted = onOpenSession) }
+                                    },
+                                    enabled = workoutItems.isNotEmpty() && active == null,
+                                ) { Text("Sem aquecimento") }
+                                TextButton(
+                                    onClick = {
+                                        runWithWorkoutNotificationPermission { vm.startTestSession(workout.id, onOpenSession) }
+                                    },
+                                    enabled = workoutItems.isNotEmpty() && active == null,
+                                ) {
+                                    Icon(Icons.Default.Science, null)
+                                    Text("Modo teste", Modifier.padding(start = 6.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "SEQUÊNCIA",
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text("${workoutItems.size} movimentos", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+
+                itemsIndexed(workoutItems, key = { _, item -> item.id }) { index, item ->
+                    val exercise = exercises.firstOrNull { it.id == item.exerciseId }
+                    Column {
+                        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                (index + 1).toString().padStart(2, '0'),
+                                modifier = Modifier.width(42.dp),
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Column(Modifier.weight(1f)) {
+                                Text(
                                     exercise?.name ?: "Exercício",
-                                    fontWeight = FontWeight.SemiBold,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
                                 Text(
-                                    "${item.sets} × ${item.repMin}–${item.repMax} ${if (item.trackingMode == "Tempo") "s" else if (item.trackingMode == "Distância") "m" else "reps"} · ${item.targetLoadKg.toClean()} kg",
+                                    "${item.sets} × ${item.repMin}–${item.repMax} ${if (item.trackingMode == "Tempo") "s" else if (item.trackingMode == "Distância") "m" else "reps"}  /  ${item.targetLoadKg.toClean()} kg",
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             }
-                            Spacer(Modifier.width(8.dp))
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            ) {
+                            Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surfaceVariant) {
                                 Text(
                                     "${item.restSeconds}s",
-                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                                     style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
+                                    fontWeight = FontWeight.Bold,
                                 )
                             }
                         }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.62f))
                     }
                 }
-                item { OutlinedButton(onClick = onOpenCalendar, modifier = Modifier.fillMaxWidth()) { Text("Ver calendário semanal") } }
             }
-            item { Spacer(Modifier.height(100.dp)) }
         }
     }
 }
 
 @Composable
 private fun EmptyToday(onOpenCalendar: () -> Unit) {
-    GlassCard(
-        modifier = Modifier.fillMaxWidth().padding(top = 64.dp),
-        contentPadding = PaddingValues(24.dp),
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("RECUPERAÇÃO / HOJE", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            Text("Sem treino programado.", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+            Text("Descanso também faz parte da progressão. Se quiser treinar, ajuste sua semana.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            GradientActionButton(onClick = onOpenCalendar, onClickLabel = "Planejar semana") {
+                Text("Planejar semana", fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TodayMetric(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun TodayQuickAction(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(
-            Modifier.fillMaxWidth(),
+            Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(7.dp),
         ) {
-            Box(Modifier.size(72.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                NeonIcon(Icons.Default.Check, null, selected = true, intensity = 1.35f, size = 48.dp)
-            }
-            Text("Hoje pode ser descanso", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("Programe um treino ou aproveite para recuperar.", textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            GradientActionButton(onClick = onOpenCalendar, onClickLabel = "Planejar semana") { Text("Planejar semana") }
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, maxLines = 1)
         }
     }
 }

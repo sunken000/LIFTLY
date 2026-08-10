@@ -293,8 +293,8 @@ private fun AnimatedLiftlyBackdrop(
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    primary.copy(alpha = 0.09f),
-                    glow.copy(alpha = 0.035f),
+                    primary.copy(alpha = 0.115f),
+                    glow.copy(alpha = 0.045f),
                     Color.Transparent,
                 ),
                 center = upper,
@@ -308,8 +308,8 @@ private fun AnimatedLiftlyBackdrop(
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    secondary.copy(alpha = 0.06f),
-                    tertiary.copy(alpha = 0.025f),
+                    secondary.copy(alpha = 0.072f),
+                    tertiary.copy(alpha = 0.030f),
                     Color.Transparent,
                 ),
                 center = lower,
@@ -434,7 +434,7 @@ private fun AnimatedLiftlyBackdrop(
             val seed = index * 0.6180339f
             val xFraction = (seed + drift * (0.018f + (index % 3) * 0.006f)) % 1f
             val yFraction = (index * 0.173f + sin(angle * 0.45f + index) * 0.016f + 1f) % 1f
-            val alpha = 0.030f + (index % 4) * 0.007f
+            val alpha = 0.024f + (index % 4) * 0.006f
             drawCircle(
                 color = if (index % 3 == 0) secondary.copy(alpha = alpha) else primary.copy(alpha = alpha),
                 radius = (0.8f + index % 3 * 0.45f).dp.toPx(),
@@ -460,7 +460,7 @@ private fun StaticLiftlyBackdrop(
         val lower = Offset(size.width * 0.10f, size.height * 0.88f)
         drawCircle(
             brush = Brush.radialGradient(
-                listOf(primary.copy(alpha = 0.07f), Color.Transparent),
+                listOf(primary.copy(alpha = 0.095f), Color.Transparent),
                 center = upper,
                 radius = shortest * 0.60f,
             ),
@@ -469,7 +469,7 @@ private fun StaticLiftlyBackdrop(
         )
         drawCircle(
             brush = Brush.radialGradient(
-                listOf(secondary.copy(alpha = 0.05f), Color.Transparent),
+                listOf(secondary.copy(alpha = 0.055f), Color.Transparent),
                 center = lower,
                 radius = shortest * 0.46f,
             ),
@@ -655,7 +655,7 @@ fun NeonIcon(
     }
 }
 
-/** Translucent premium surface with a theme-aware gradient edge. */
+/** Liftly surface: solid body, asymmetric shape and a directional brand edge. */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
@@ -663,7 +663,7 @@ fun GlassCard(
     containerColor: Color = Color.Unspecified,
     contentColor: Color = Color.Unspecified,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    elevation: androidx.compose.ui.unit.Dp = 1.dp,
+    elevation: androidx.compose.ui.unit.Dp = 0.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -677,9 +677,9 @@ fun GlassCard(
     }
     val borderBrush = Brush.linearGradient(
         colors = listOf(
-            colors.primary.copy(alpha = 0.18f),
-            colors.secondary.copy(alpha = 0.08f),
-            colors.outlineVariant.copy(alpha = 0.44f),
+            colors.primary.copy(alpha = 0.42f),
+            colors.primary.copy(alpha = 0.10f),
+            colors.outlineVariant.copy(alpha = 0.62f),
         ),
     )
 
@@ -704,7 +704,7 @@ fun GlassCard(
     }
 }
 
-/** Clickable glass surface with a restrained press scale and complete button semantics. */
+/** Clickable Liftly surface with native ripple and restrained tactile motion. */
 @Composable
 fun InteractiveGlassCard(
     onClick: () -> Unit,
@@ -757,7 +757,7 @@ fun InteractiveGlassCard(
     )
 }
 
-/** High-emphasis gradient action with generic Row content for text and/or icons. */
+/** High-emphasis Liftly action: solid brand color and asymmetric silhouette. */
 @Composable
 fun GradientActionButton(
     onClick: () -> Unit,
@@ -792,15 +792,11 @@ fun GradientActionButton(
             }
             .shadow(if (enabled) 2.dp else 0.dp, shape, clip = false)
             .clip(shape)
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(colors.primary, colors.tertiary),
-                ),
-            )
+            .background(colors.primary, shape)
             .then(accessibility)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
+                indication = androidx.compose.foundation.LocalIndication.current,
                 enabled = enabled,
                 role = Role.Button,
                 onClickLabel = onClickLabel,
@@ -837,12 +833,7 @@ fun SectionHeader(
                 .width(4.dp)
                 .height(if (subtitle.isNullOrBlank()) 30.dp else 46.dp)
                 .background(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f),
-                        ),
-                    ),
+                    color = MaterialTheme.colorScheme.primary,
                     shape = CircleShape,
                 ),
         )

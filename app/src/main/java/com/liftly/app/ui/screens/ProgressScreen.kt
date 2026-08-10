@@ -43,6 +43,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -185,39 +186,34 @@ fun ProgressScreen(vm: AppViewModel) {
     Scaffold(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        topBar = {
-            TopAppBar(
-                title = { Text("Progresso", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                )
-            )
-        }
     ) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 22.dp, bottom = 112.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        "LIFTLY / PROGRESSO",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                         Text(
-                            "${momentum.currentWeekWorkouts} ${if (momentum.currentWeekWorkouts == 1) "treino" else "treinos"} nesta semana",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
+                            "Seu ritmo",
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.Black,
                         )
-                        Text(
-                            "Meta de ${momentum.weeklyGoal} • sequência de ${momentum.completedWeekStreak} sem.",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        OutlinedButton(onClick = { showHistoryManager = true }, enabled = finishedDates.isNotEmpty()) { Text("Gerenciar") }
                     }
-                    OutlinedButton(onClick = { showHistoryManager = true }, enabled = finishedDates.isNotEmpty()) {
-                        Icon(Icons.Default.DeleteSweep, contentDescription = null)
-                        Text("Gerenciar", Modifier.padding(start = 6.dp))
-                    }
+                    Text(
+                        "${momentum.currentWeekWorkouts}/${momentum.weeklyGoal} treinos nesta semana  /  ${momentum.completedWeekStreak} sem. em sequência",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
             item {
@@ -726,33 +722,46 @@ private fun MilestoneCard(milestone: TrainingMilestone) {
 
 @Composable
 private fun MetricCard(title: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier) {
-    GlassCard(modifier = modifier, elevation = 5.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            NeonIcon(icon, null, selected = true, intensity = 1.05f, size = 32.dp)
-            Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text(title.uppercase(), modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+            }
+            Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+            Box(Modifier.fillMaxWidth(0.36f).height(3.dp).background(MaterialTheme.colorScheme.primary, MaterialTheme.shapes.extraSmall))
         }
     }
 }
 
 @Composable
 private fun MetricMini(label: String, value: String, modifier: Modifier = Modifier) {
-    Card(modifier, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(Modifier.fillMaxWidth().padding(10.dp), horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-            Text(value, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Surface(modifier = modifier, shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surfaceVariant) {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Text(value, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+            Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
 private fun ChartCard(title: String, subtitle: String, points: List<Double>, color: Color) {
-    GlassCard(modifier = Modifier.fillMaxWidth(), elevation = 5.dp) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
         Column(Modifier.padding(18.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(title.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(18.dp))
-            Box(Modifier.fillMaxWidth().height(170.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp))) {
+            Box(Modifier.fillMaxWidth().height(170.dp).background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium)) {
                 if (points.size > 1) {
                     Canvas(Modifier.fillMaxSize().padding(14.dp)) {
                         val min = points.minOrNull() ?: 0.0
@@ -763,12 +772,16 @@ private fun ChartCard(title: String, subtitle: String, points: List<Double>, col
                             val x = size.width * index / (points.size - 1)
                             val y = size.height - (size.height * ((value - min) / range).toFloat())
                             if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
-                            drawCircle(color, 5.dp.toPx(), Offset(x, y))
+                            drawCircle(color, 4.dp.toPx(), Offset(x, y))
                         }
                         drawPath(path, color, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
                     }
                 } else {
-                    Text(if (points.isEmpty()) "Sem dados ainda" else "Mais um registro formará a linha", Modifier.padding(18.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        if (points.isEmpty()) "Sem dados ainda" else "Mais um registro formará a linha",
+                        Modifier.padding(18.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }

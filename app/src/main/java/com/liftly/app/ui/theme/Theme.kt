@@ -17,13 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// 1.5.4: violeta mais sóbrio e menos saturado. O roxo continua sendo a assinatura do Liftly,
-// mas deixa de competir com conteúdo, métricas e estados funcionais.
-val LiftlyPurple = Color(0xFF8E72B5)
-val LiftlyPurpleBright = Color(0xFFB8A7D6)
-val LiftlyPurpleDark = Color(0xFF5D4A78)
-val LiftlyInk = Color(0xFF0E0D10)
-val LiftlySlate = Color(0xFF17161A)
+// 1.5.5: identidade "Liftline" — violeta vivo em superfícies escuras sólidas.
+val LiftlyPurple = Color(0xFF9B5DE5)
+val LiftlyPurpleBright = Color(0xFFC9A7FF)
+val LiftlyPurpleDark = Color(0xFF5D2E86)
+val LiftlyInk = Color(0xFF0B0910)
+val LiftlySlate = Color(0xFF16121B)
 
 // Aliases preservados para compatibilidade com código e previews antigos.
 val LiftlyTeal = LiftlyPurple
@@ -32,25 +31,25 @@ val LiftlyTealDark = LiftlyPurpleDark
 
 private val PurpleNeonColors = darkColorScheme(
     primary = LiftlyPurpleBright,
-    onPrimary = Color(0xFF251F2C),
-    primaryContainer = Color(0xFF2B2532),
-    onPrimaryContainer = Color(0xFFE9E2F1),
-    secondary = Color(0xFFAEA5B5),
-    onSecondary = Color(0xFF29262D),
-    secondaryContainer = Color(0xFF2D2931),
-    onSecondaryContainer = Color(0xFFE8E3EA),
-    tertiary = Color(0xFFA997B8),
-    onTertiary = Color(0xFF2C2630),
-    tertiaryContainer = Color(0xFF332C37),
-    onTertiaryContainer = Color(0xFFEBE3ED),
+    onPrimary = Color(0xFF24142F),
+    primaryContainer = Color(0xFF2E1D3D),
+    onPrimaryContainer = Color(0xFFF1E6FF),
+    secondary = Color(0xFFD0C7D6),
+    onSecondary = Color(0xFF29252D),
+    secondaryContainer = Color(0xFF29242D),
+    onSecondaryContainer = Color(0xFFEDE7F0),
+    tertiary = Color(0xFFE4A06A),
+    onTertiary = Color(0xFF3E2109),
+    tertiaryContainer = Color(0xFF402A1B),
+    onTertiaryContainer = Color(0xFFFFE2C9),
     background = LiftlyInk,
     onBackground = Color(0xFFF1EFF3),
     surface = LiftlySlate,
     onSurface = Color(0xFFF1EFF3),
-    surfaceVariant = Color(0xFF222126),
-    onSurfaceVariant = Color(0xFFC7C1CB),
+    surfaceVariant = Color(0xFF241E29),
+    onSurfaceVariant = Color(0xFFCEC5D3),
     outline = Color(0xFF7B7580),
-    outlineVariant = Color(0xFF39353D),
+    outlineVariant = Color(0xFF413747),
     error = Color(0xFFFFB4AB),
     onError = Color(0xFF690005),
     errorContainer = Color(0xFF93000A),
@@ -59,18 +58,18 @@ private val PurpleNeonColors = darkColorScheme(
 )
 
 private val WhiteColors = lightColorScheme(
-    primary = Color(0xFF67507E),
+    primary = Color(0xFF713AA8),
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFE9E1EE),
-    onPrimaryContainer = Color(0xFF271F2D),
+    primaryContainer = Color(0xFFF0E3FF),
+    onPrimaryContainer = Color(0xFF2C123F),
     secondary = Color(0xFF726A77),
     onSecondary = Color.White,
     secondaryContainer = Color(0xFFECE8EE),
     onSecondaryContainer = Color(0xFF27232A),
-    tertiary = Color(0xFF7C687A),
+    tertiary = Color(0xFF9A5B2C),
     onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFF0E6ED),
-    onTertiaryContainer = Color(0xFF2B222A),
+    tertiaryContainer = Color(0xFFFFE1CB),
+    onTertiaryContainer = Color(0xFF341704),
     background = Color(0xFFF8F8FA),
     onBackground = Color(0xFF1D1C20),
     surface = Color.White,
@@ -87,18 +86,18 @@ private val WhiteColors = lightColorScheme(
 )
 
 private val BlackColors = darkColorScheme(
-    primary = Color(0xFFB8A7D6),
-    onPrimary = Color(0xFF251F2C),
-    primaryContainer = Color(0xFF2A2430),
-    onPrimaryContainer = Color(0xFFE9E2F1),
+    primary = Color(0xFFC9A7FF),
+    onPrimary = Color(0xFF24142F),
+    primaryContainer = Color(0xFF2D1B3B),
+    onPrimaryContainer = Color(0xFFF1E6FF),
     secondary = Color(0xFFAAA3AD),
     onSecondary = Color(0xFF28262A),
     secondaryContainer = Color(0xFF272629),
     onSecondaryContainer = Color(0xFFE9E6EA),
-    tertiary = Color(0xFFA89EAA),
-    onTertiary = Color(0xFF292629),
-    tertiaryContainer = Color(0xFF2B292D),
-    onTertiaryContainer = Color(0xFFEBE8EC),
+    tertiary = Color(0xFFE4A06A),
+    onTertiary = Color(0xFF3E2109),
+    tertiaryContainer = Color(0xFF3C281A),
+    onTertiaryContainer = Color(0xFFFFE2C9),
     background = Color.Black,
     onBackground = Color(0xFFF3F2F5),
     surface = Color(0xFF0D0D0F),
@@ -140,11 +139,11 @@ private val PurpleNeonExtendedColors = LiftlyExtendedColors(
     onWarning = Color(0xFF422C00),
     warningContainer = Color(0xFF5E4200),
     onWarningContainer = Color(0xFFFFDF99),
-    chartGrid = Color(0xFF3A3740),
-    glow = LiftlyPurple.copy(alpha = 0.14f),
-    ambientPrimary = Color(0xFF6E5A88),
-    ambientSecondary = Color(0xFF7A6677),
-    glassSurface = Color(0xFA19181C),
+    chartGrid = Color(0xFF403649),
+    glow = LiftlyPurple.copy(alpha = 0.18f),
+    ambientPrimary = Color(0xFF7039A5),
+    ambientSecondary = Color(0xFF3B2A45),
+    glassSurface = Color(0xFF19141F),
 )
 
 private val WhiteExtendedColors = LiftlyExtendedColors(
@@ -160,7 +159,7 @@ private val WhiteExtendedColors = LiftlyExtendedColors(
     glow = LiftlyPurple.copy(alpha = 0.08f),
     ambientPrimary = Color(0xFFE6E0EC),
     ambientSecondary = Color(0xFFEBE5E9),
-    glassSurface = Color(0xFCFFFFFF),
+    glassSurface = Color(0xFFFFFFFF),
 )
 
 private val BlackExtendedColors = LiftlyExtendedColors(
@@ -176,7 +175,7 @@ private val BlackExtendedColors = LiftlyExtendedColors(
     glow = Color.Transparent,
     ambientPrimary = Color.Transparent,
     ambientSecondary = Color.Transparent,
-    glassSurface = Color(0xFC111113),
+    glassSurface = Color(0xFF111013),
 )
 
 private val LocalLiftlyExtendedColors = staticCompositionLocalOf { PurpleNeonExtendedColors }
@@ -187,36 +186,46 @@ val MaterialTheme.liftlyColors: LiftlyExtendedColors
     get() = LocalLiftlyExtendedColors.current
 
 private val LiftlyShapes = Shapes(
-    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-    small = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
-    medium = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-    large = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
-    extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
+    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(
+        topStart = 6.dp, topEnd = 10.dp, bottomEnd = 6.dp, bottomStart = 10.dp,
+    ),
+    small = androidx.compose.foundation.shape.RoundedCornerShape(
+        topStart = 8.dp, topEnd = 14.dp, bottomEnd = 8.dp, bottomStart = 14.dp,
+    ),
+    medium = androidx.compose.foundation.shape.RoundedCornerShape(
+        topStart = 10.dp, topEnd = 18.dp, bottomEnd = 10.dp, bottomStart = 18.dp,
+    ),
+    large = androidx.compose.foundation.shape.RoundedCornerShape(
+        topStart = 12.dp, topEnd = 24.dp, bottomEnd = 12.dp, bottomStart = 24.dp,
+    ),
+    extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(
+        topStart = 14.dp, topEnd = 32.dp, bottomEnd = 14.dp, bottomStart = 32.dp,
+    ),
 )
 
 private val LiftlyTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Black,
         fontSize = 54.sp,
         lineHeight = 60.sp,
         letterSpacing = (-0.5).sp,
     ),
     displayMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Black,
         fontSize = 42.sp,
         lineHeight = 48.sp,
     ),
     headlineLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Black,
         fontSize = 32.sp,
         lineHeight = 40.sp,
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 27.sp,
         lineHeight = 34.sp,
     ),
@@ -278,17 +287,17 @@ private val LiftlyTypography = Typography(
     ),
     labelMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.4.sp,
+        letterSpacing = 0.7.sp,
     ),
     labelSmall = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 11.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.4.sp,
+        letterSpacing = 0.9.sp,
     ),
 )
 
