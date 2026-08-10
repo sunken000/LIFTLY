@@ -2,11 +2,12 @@
 
 ## 1.5.3 — 2026-08-10
 
-- Registrada nova atualização da build **Liftly Pessoal**.
-- Build recebida para distribuição: `Liftly-training-improvements-personal-debug.apk`.
-- Pacote Android: `com.liftly.app`.
-- Esta atualização passa a ser identificada nos logs do projeto como **1.5.3**.
-- Observação: o APK fornecido ainda declara internamente `versionName 1.5.2`; o número interno será 1.5.3 somente após recompilação com o versionamento incrementado.
+- Aplicação consolidada sob o nome **Liftly**.
+- `versionName` atualizado para **1.5.3**.
+- `versionCode` atualizado para **35**.
+- Configuração Gradle simplificada para uma única aplicação `com.liftly.app`.
+- Artefatos e documentação que não pertencem à versão atual foram removidos.
+- Rewards, importação de treinos por texto e os demais recursos da série 1.5 permanecem no aplicativo.
 
 Detalhes: [Patch notes 1.5.3](docs/PATCH_NOTES_1.5.3.md).
 
