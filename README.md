@@ -2,23 +2,29 @@
 
 Aplicativo Android nativo, offline-first e em português para montar, organizar e acompanhar treinos de academia. O projeto usa Kotlin, Jetpack Compose, Material Design 3, MVVM, Room, Navigation Compose, Coroutines/StateFlow, DataStore e WorkManager.
 
-## Versão atual — 1.5.3
+## Versão atual — 1.5.4
 
-- **versionName:** `1.5.3`
-- **versionCode:** `35`
+- **versionName:** `1.5.4`
+- **versionCode:** `36`
 - **applicationId:** `com.liftly.app`
 - **Android mínimo:** Android 8.0 / API 26
 - **targetSdk / compileSdk:** 36
 
 O repositório mantém uma única aplicação Android: **Liftly**.
 
-## Novidades da 1.5.3
+## Novidades da 1.5.4
 
-- consolidação do projeto em uma única aplicação;
-- atualização do código Android para `versionName 1.5.3` e `versionCode 35`;
-- simplificação da configuração Gradle para uma única variante principal;
-- limpeza de artefatos e documentação que não fazem parte do aplicativo atual;
-- manutenção dos recursos introduzidos na série 1.5, incluindo Rewards e importação de treinos por texto.
+A 1.5.4 faz um refinamento da identidade visual sem alterar a estrutura do produto:
+
+- roxo principal menos saturado e mais sóbrio;
+- superfícies mais opacas, reduzindo o aspecto de glassmorphism genérico;
+- tons secundários mais neutros para deixar métricas, textos e estados funcionais dominarem a hierarquia;
+- tema claro com fundo mais neutro e menos lilás;
+- tema OLED com superfícies mais discretas;
+- brilho ambiental e cores de apoio menos chamativos;
+- manutenção da assinatura violeta do Liftly sem transformar cada elemento em destaque visual.
+
+A direção segue o sistema de tema do Material 3: cor, tipografia e formas continuam centralizadas no `MaterialTheme`, enquanto os componentes específicos do Liftly usam os mesmos tokens de forma consistente.
 
 ## Recursos principais
 
@@ -177,7 +183,7 @@ Exemplo:
 
 ```powershell
 $env:LIFTLY_DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/SEU_ID/SEU_TOKEN"
-.\tools\discord_publish.ps1 -Message "Liftly 1.5.3." -Files @("README.md")
+.\tools\discord_publish.ps1 -Message "Liftly 1.5.4." -Files @("README.md")
 Remove-Item Env:LIFTLY_DISCORD_WEBHOOK_URL
 ```
 
@@ -213,4 +219,5 @@ A arquitetura e o fluxo de dados estão detalhados em [docs/ARQUITETURA.md](docs
 - [Patch notes 1.5.1](docs/PATCH_NOTES_1.5.1.md)
 - [Patch notes 1.5.2](docs/PATCH_NOTES_1.5.2.md)
 - [Patch notes 1.5.3](docs/PATCH_NOTES_1.5.3.md)
+- [Patch notes 1.5.4](docs/PATCH_NOTES_1.5.4.md)
 - [Checklist de testes e limitações](docs/TESTES_E_LIMITACOES.md)
