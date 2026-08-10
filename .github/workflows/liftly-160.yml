@@ -35,6 +35,7 @@ jobs:
         run: |
           chmod +x gradlew
           python3 tools/apply_liftly_160.py
+          python3 tools/apply_version_label_160.py
           sed -i 's/Liftly-v1\.5\.5\.apk/Liftly-v1.6.0.apk/g' README.md
 
       - name: Unit tests
@@ -61,7 +62,7 @@ jobs:
 
       - name: Remove migration-only files
         run: |
-          rm -f tools/apply_liftly_160.py tools/trigger-160.txt
+          rm -f tools/apply_liftly_160.py tools/apply_version_label_160.py tools/trigger-160.txt
           rm -f .github/workflows/liftly-160.yml
 
       - name: Publish validated 1.6.0 to branch
