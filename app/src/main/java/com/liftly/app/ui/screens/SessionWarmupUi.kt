@@ -1,36 +1,27 @@
 package com.liftly.app.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.liftly.app.domain.AutomaticWarmupPlan
 import com.liftly.app.domain.ExerciseWarmupPlan
 import com.liftly.app.domain.WarmupSetKind
-import com.liftly.app.ui.components.GlassCard
-import com.liftly.app.ui.components.NeonIcon
+import com.liftly.app.ui.components.TrainingSetSurface
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -100,117 +91,72 @@ internal fun SessionWarmupBlock(
     val blockHasActiveTimer = timerRunning && steps.any { it.id == activeTimerStepId }
     val blockCompleted = steps.all { it.id in completedIds } && !blockHasActiveTimer
 
-    GlassCard(
-        modifier = modifier.fillMaxWidth(),
-        containerColor = if (blockCompleted) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
-        contentPadding = PaddingValues(16.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            NeonIcon(
-                imageVector = if (blockCompleted) Icons.Default.CheckCircle else Icons.Default.FitnessCenter,
-                contentDescription = null,
-                selected = true,
-                size = 38.dp,
-            )
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
                 Text(
-                    if (blockCompleted) "Concluído • não entra no progresso" else subtitle,
+                    if (blockCompleted) "Aquecimento concluído • fora do volume oficial" else subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             if (blockCompleted) {
                 TextButton(onClick = onReset) {
-                    Icon(Icons.Default.Refresh, null)
+                    Icon(Icons.Default.Refresh, contentDescription = null)
                     Text("Refazer", Modifier.padding(start = 4.dp))
                 }
             }
         }
 
-        if (!blockCompleted) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+        val firstPendingId = steps.firstOrNull { it.id !in completedIds }?.id
+        val visibleSteps = steps.filter { it.id in completedIds || it.id == firstPendingId }
+        visibleSteps.forEach { step ->
+            val index = steps.indexOf(step)
+            val completed = step.id in completedIds
+            val thisTimerActive = activeTimerStepId == step.id && timerRunning
+            TrainingSetSurface(
+                numberLabel = (index + 1).toString().padStart(2, '0'),
+                title = step.title,
+                subtitle = step.subtitle,
+                completed = completed,
+                onCompletedChange = { onToggle(step, it) },
+                badge = "AQUECIMENTO",
             ) {
-                steps.forEach { step ->
-                    val completed = step.id in completedIds
-                    val thisTimerActive = activeTimerStepId == step.id && timerRunning
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium,
-                        color = if (completed) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.72f)
-                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.92f),
-                    ) {
-                        Column(
-                            Modifier.fillMaxWidth().padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(
-                                    checked = completed,
-                                    onCheckedChange = { onToggle(step, it) },
-                                    enabled = !timerRunning || completed,
-                                )
-                                Column(Modifier.weight(1f).padding(horizontal = 4.dp)) {
-                                    Text(
-                                        if (step.workoutExerciseId == null) step.title else step.subtitle,
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                    Text(step.instruction, style = MaterialTheme.typography.bodySmall)
-                                }
-                                Text(
-                                    step.prescription,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-                            Text(
-                                step.reason,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            if (thisTimerActive) {
-                                Row(
-                                    Modifier.fillMaxWidth()
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Icon(Icons.Default.Timer, null, tint = MaterialTheme.colorScheme.secondary)
-                                    Text(
-                                        if (timerIsRest) "Descanso: ${warmupClock(timerSecondsLeft)}"
-                                        else "Tempo: ${warmupClock(timerSecondsLeft)}",
-                                        Modifier.weight(1f).padding(start = 8.dp),
-                                        fontWeight = FontWeight.Bold,
-                                    )
-                                    TextButton(onClick = onFinishTimer) { Text("Concluir") }
-                                }
-                            } else if (!completed && step.timerSeconds != null) {
-                                OutlinedButton(
-                                    onClick = { onStartTimer(step) },
-                                    enabled = !timerRunning,
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Icon(Icons.Default.Timer, null)
-                                    Text("Cronometrar ${warmupClock(step.timerSeconds)}", Modifier.padding(start = 6.dp))
-                                }
-                            }
-                            if (!completed && step.restAfterSeconds > 0) {
-                                Text(
-                                    "Depois: ${step.restAfterSeconds}s de descanso.",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                )
-                            }
-                        }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(step.prescription, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
+                        Text(step.instruction, style = MaterialTheme.typography.bodySmall)
                     }
+                    if (thisTimerActive) {
+                        Text(
+                            if (timerIsRest) "DESC ${warmupClock(timerSecondsLeft)}" else warmupClock(timerSecondsLeft),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Black,
+                        )
+                    }
+                }
+                Text(step.reason, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                when {
+                    thisTimerActive -> OutlinedButton(onClick = onFinishTimer, modifier = Modifier.fillMaxWidth()) {
+                        Icon(Icons.Default.Timer, contentDescription = null)
+                        Text(if (timerIsRest) "Encerrar descanso" else "Concluir tempo", Modifier.padding(start = 6.dp))
+                    }
+                    !completed && step.timerSeconds != null -> OutlinedButton(
+                        onClick = { onStartTimer(step) },
+                        enabled = !timerRunning,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(Icons.Default.Timer, contentDescription = null)
+                        Text("Iniciar ${warmupClock(step.timerSeconds)}", Modifier.padding(start = 6.dp))
+                    }
+                }
+                if (!completed && step.restAfterSeconds > 0) {
+                    Text(
+                        "Depois desta série: ${step.restAfterSeconds}s de descanso.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
         }

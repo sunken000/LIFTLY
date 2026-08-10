@@ -65,6 +65,14 @@
                 android:value="Tracks a user-started workout and its active rest countdown outside the app" />
         </service>
 
+        <service
+            android:name=".integration.wear.WearCommandListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+            </intent-filter>
+        </service>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

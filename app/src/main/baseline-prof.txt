@@ -1,0 +1,10 @@
+HSPLcom/liftly/app/MainActivity;
+HSPLcom/liftly/app/LiftlyApplication;
+HSPLcom/liftly/app/ui/AppViewModel;
+HSPLcom/liftly/app/ui/LiftlyAppKt;
+HSPLcom/liftly/app/ui/screens/TodayScreenKt;
+HSPLcom/liftly/app/ui/screens/ProgressScreenKt;
+HSPLcom/liftly/app/data/LiftlyRepository;
+HSPLcom/liftly/app/data/LiftlyDatabase;
+HSPLcom/liftly/app/domain/ProgressionCoach;
+HSPLcom/liftly/app/domain/WorkoutReportBuilder;

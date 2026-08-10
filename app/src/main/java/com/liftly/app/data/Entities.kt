@@ -238,4 +238,5 @@ data class SessionSummary(
     val rewardXp: Long = 0L,
     val rewardCoins: Long = 0L,
     val completedRewardMissions: List<String> = emptyList(),
+    val adaptiveChanges: Int = 0,
 )

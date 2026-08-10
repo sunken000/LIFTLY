@@ -2,7 +2,12 @@ package com.liftly.app.data
 
 import android.content.Context
 import androidx.room.withTransaction
+import com.liftly.app.domain.AdaptiveTrainingPlan
+import com.liftly.app.domain.CurrentExerciseSetPerformance
 import com.liftly.app.domain.EffectiveScheduleResolver
+import com.liftly.app.domain.HistoricalExercisePerformance
+import com.liftly.app.domain.ProgressionCoach
+import com.liftly.app.domain.ProgressionCoachInput
 import com.liftly.app.domain.ParsedSetType
 import com.liftly.app.domain.ParsedWorkout
 import com.liftly.app.domain.TrainingMomentum
@@ -49,6 +54,40 @@ class LiftlyRepository(
         database.withTransaction {
             normalizeAllWorkoutExerciseOrders()
             rewardStore.initializeInTransaction(System.currentTimeMillis())
+            backfillHistoricalRewardsInTransaction()
+        }
+    }
+
+    /**
+     * Idempotent retroactive migration. The immutable ledger key session:<id> prevents any
+     * workout already rewarded by previous versions from minting XP/coins twice.
+     */
+    private suspend fun backfillHistoricalRewardsInTransaction() {
+        val historical = dao.allSessions()
+            .filter { it.finishedAt != null && !it.isTestMode }
+            .sortedWith(compareBy<SessionEntity> { it.startedAt }.thenBy { it.id })
+        val previousBest = mutableMapOf<String, Double>()
+        historical.forEach { session ->
+            val sessionSets = dao.sessionSets(session.id)
+            val completed = sessionSets.filter(SessionSetEntity::completed)
+            if (completed.isEmpty()) return@forEach
+            var personalRecords = 0
+            completed.groupBy(SessionSetEntity::exerciseId).forEach { (exerciseId, exerciseSets) ->
+                val best = exerciseSets.maxOf(SessionSetEntity::loadKg)
+                val old = previousBest[exerciseId]
+                if (old != null && best > old + 0.0001) personalRecords++
+                if (old == null || best > old) previousBest[exerciseId] = best
+            }
+            rewardStore.awardWorkoutCompletionInTransaction(
+                sessionId = session.id,
+                metrics = WorkoutRewardMetrics(
+                    completedSets = completed.size,
+                    totalSets = sessionSets.size,
+                    rirRecordedSets = completed.count { it.rir != null },
+                    personalRecords = personalRecords,
+                ),
+                occurredAt = session.finishedAt ?: session.startedAt,
+            )
         }
     }
 
@@ -474,6 +513,26 @@ class LiftlyRepository(
         ))
     }
 
+    suspend fun updateSetFromWear(
+        setId: String,
+        reps: Int,
+        loadKg: Double,
+        rir: Int?,
+        complete: Boolean,
+    ) {
+        val current = dao.sessionSet(setId) ?: return
+        val session = dao.session(current.sessionId) ?: return
+        if (session.status != "Em andamento") return
+        saveSet(
+            item = current,
+            reps = reps,
+            load = loadKg,
+            toggleCompletion = complete,
+            rir = rir,
+            painLevel = current.painLevel,
+        )
+    }
+
     suspend fun substituteSessionExercise(
         sessionId: String,
         workoutExerciseId: String,
@@ -524,6 +583,74 @@ class LiftlyRepository(
         updated.size
     }
 
+    private suspend fun adaptWorkoutPlanAfterSession(
+        session: SessionEntity,
+        completedSets: List<SessionSetEntity>,
+    ): Int {
+        if (session.isTestMode || completedSets.isEmpty()) return 0
+        val previousSessions = dao.allSessions()
+            .filter { it.id != session.id && it.finishedAt != null && !it.isTestMode }
+            .associate { it.id to it.startedAt }
+        val historicalSets = dao.allSessionSets()
+        var changed = 0
+        completedSets.groupBy(SessionSetEntity::workoutExerciseId).forEach { (workoutExerciseId, current) ->
+            val item = dao.workoutExercise(workoutExerciseId) ?: return@forEach
+            if (current.firstOrNull()?.exerciseId != item.exerciseId) return@forEach
+            if (!item.trackingMode.contains("Rep", ignoreCase = true)) return@forEach
+            val exercise = dao.exercise(item.exerciseId) ?: return@forEach
+            val currentPerformances = current
+                .filter { it.completed }
+                .sortedBy { it.setNumber }
+                .map {
+                    CurrentExerciseSetPerformance(
+                        setNumber = it.setNumber,
+                        reps = it.reps,
+                        loadKg = it.loadKg,
+                        rir = it.rir,
+                        painLevel = it.painLevel,
+                    )
+                }
+            if (currentPerformances.isEmpty()) return@forEach
+            val recent = historicalSets
+                .asSequence()
+                .filter { it.exerciseId == item.exerciseId && it.sessionId in previousSessions && it.completed }
+                .groupBy { "${it.sessionId}:${it.workoutExerciseId}" }
+                .entries
+                .sortedByDescending { entry -> previousSessions[entry.value.first().sessionId] ?: 0L }
+                .mapNotNull { entry ->
+                    val values = entry.value.sortedBy { it.setNumber }
+                    val latest = values.lastOrNull() ?: return@mapNotNull null
+                    HistoricalExercisePerformance(
+                        actualReps = values.minOf { it.reps },
+                        actualLoadKg = latest.loadKg,
+                        rir = values.mapNotNull { it.rir }.minOrNull(),
+                        painLevel = values.maxOf { it.painLevel },
+                    )
+                }
+                .take(2)
+            val latest = currentPerformances.last()
+            val recommendation = ProgressionCoach().recommend(
+                ProgressionCoachInput(
+                    exerciseName = exercise.name,
+                    category = exercise.category.ifBlank { "Musculação" },
+                    plannedRepMin = item.repMin.coerceAtLeast(1),
+                    plannedRepMax = item.repMax.coerceAtLeast(item.repMin.coerceAtLeast(1)),
+                    plannedLoadKg = item.targetLoadKg,
+                    actualReps = latest.reps,
+                    actualLoadKg = latest.loadKg,
+                    rir = latest.rir,
+                    painLevel = currentPerformances.maxOf { it.painLevel },
+                    recentPerformances = recent,
+                    currentSets = currentPerformances,
+                )
+            )
+            val prescription = AdaptiveTrainingPlan.prescription(item, recommendation) ?: return@forEach
+            dao.upsertWorkoutExercise(AdaptiveTrainingPlan.apply(item, prescription))
+            changed++
+        }
+        return changed
+    }
+
     suspend fun finishSession(sessionId: String): SessionSummary = database.withTransaction {
         val session = requireNotNull(dao.session(sessionId)) { "Sessão não encontrada." }
         val sets = dao.sessionSets(sessionId)
@@ -561,6 +688,7 @@ class LiftlyRepository(
                     )
             )
             val completedSets = sets.filter(SessionSetEntity::completed)
+            val adaptiveChanges = adaptWorkoutPlanAfterSession(session, completedSets)
             val personalRecords = completedSets
                 .groupBy(SessionSetEntity::exerciseId)
                 .count { (exerciseId, exerciseSets) ->
@@ -581,6 +709,7 @@ class LiftlyRepository(
                 rewardXp = grant.xp,
                 rewardCoins = grant.coins,
                 completedRewardMissions = grant.completedMissionIds,
+                adaptiveChanges = adaptiveChanges,
             )
         }
         summary

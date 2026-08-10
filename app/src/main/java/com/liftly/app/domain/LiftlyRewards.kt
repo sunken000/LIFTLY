@@ -49,23 +49,23 @@ object WorkoutRewardPolicy {
     fun calculate(metrics: WorkoutRewardMetrics): WorkoutRewardDecision {
         if (!metrics.isValid) return WorkoutRewardDecision.NONE
 
-        var xp = 100L
-        var coins = 25L
-        val reasons = mutableListOf("Treino concluído")
+        var xp = 80L
+        var coins = 15L
+        val reasons = mutableListOf("Sessão válida registrada")
         if (metrics.isComplete) {
-            xp += 30
-            coins += 10
-            reasons += "Ficha completa"
-        }
-        if (metrics.completedSets >= 3 && metrics.rirRecordedSets == metrics.completedSets) {
             xp += 20
             coins += 5
-            reasons += "RIR registrado em todas as séries"
+            reasons += "Plano do dia concluído"
         }
-        val rewardedRecords = metrics.personalRecords.coerceAtMost(3)
+        if (metrics.completedSets >= 3 && metrics.rirRecordedSets == metrics.completedSets) {
+            xp += 15
+            coins += 5
+            reasons += "Esforço registrado com consistência"
+        }
+        val rewardedRecords = metrics.personalRecords.coerceAtMost(2)
         if (rewardedRecords > 0) {
-            xp += 50L * rewardedRecords
-            coins += 20L * rewardedRecords
+            xp += 30L * rewardedRecords
+            coins += 10L * rewardedRecords
             reasons += "$rewardedRecords recorde(s) pessoal(is)"
         }
         return WorkoutRewardDecision(

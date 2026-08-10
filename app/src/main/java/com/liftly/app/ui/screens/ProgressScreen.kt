@@ -70,6 +70,8 @@ import com.liftly.app.domain.TrainingMomentumCalculator
 import com.liftly.app.domain.GamificationSet
 import com.liftly.app.domain.GamificationWorkout
 import com.liftly.app.domain.MonthlyTrainingChallenge
+import com.liftly.app.domain.ProgressInsightEngine
+import com.liftly.app.domain.ProgressInsightKind
 import com.liftly.app.domain.TrainingGamificationEngine
 import com.liftly.app.domain.TrainingMilestone
 import com.liftly.app.ui.AppViewModel
@@ -166,6 +168,14 @@ fun ProgressScreen(vm: AppViewModel) {
         )
     }
     val optionNames = exerciseOptions.associate { it.id to it.name }
+    val progressReading = remember(sessions, sets, exercises, preferences.weeklyWorkoutGoal) {
+        ProgressInsightEngine.calculate(
+            sessions = sessions,
+            sets = sets,
+            exercises = exercises,
+            weeklyGoal = preferences.weeklyWorkoutGoal,
+        )
+    }
     val personalRanking = remember(completedSets, optionNames) {
         completedSets
             .filter { it.loadKg > 0.0 && it.reps > 0 && it.isRepetitionTracked() }
@@ -223,6 +233,30 @@ fun ProgressScreen(vm: AppViewModel) {
                 }
             }
             item { MetricCard("Volume total", "${totalVolume.clean()} kg", Icons.Default.Insights, Modifier.fillMaxWidth()) }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("LEITURA DO LIFTLY", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text(progressReading.summary, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    progressReading.insights.forEach { insight ->
+                        val accent = when (insight.kind) {
+                            ProgressInsightKind.POSITIVE -> MaterialTheme.colorScheme.primary
+                            ProgressInsightKind.ATTENTION -> MaterialTheme.colorScheme.error
+                            ProgressInsightKind.NEUTRAL -> MaterialTheme.colorScheme.tertiary
+                        }
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.large,
+                            color = MaterialTheme.colorScheme.surface,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, accent.copy(alpha = 0.42f)),
+                        ) {
+                            Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(insight.title, fontWeight = FontWeight.Black, color = accent)
+                                Text(insight.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            }
             item {
                 GlassCard(Modifier.fillMaxWidth(), elevation = 7.dp) {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

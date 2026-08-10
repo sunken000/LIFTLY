@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Liftly"
 include(":app")
+include(":wear")
+include(":macrobenchmark")
