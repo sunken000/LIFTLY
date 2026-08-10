@@ -1,0 +1,176 @@
+name: Finalize Liftly 1.5.3
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Apply final cleanup
+        id: cleanup
+        shell: bash
+        run: |
+          if [ ! -f .liftly-finalize-trigger ]; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          def read(path):
+              return Path(path).read_text(encoding='utf-8')
+
+          def write(path, text):
+              Path(path).write_text(text, encoding='utf-8')
+
+          profile_path = Path('app/src/main/java/com/liftly/app/ui/screens/ProfileScreen.kt')
+          profile = read(profile_path)
+          for line in (
+              'import androidx.compose.material.icons.filled.BusinessCenter\n',
+              'import androidx.compose.material.icons.filled.AdminPanelSettings\n',
+              'import com.liftly.app.BuildConfig\n',
+          ):
+              profile = profile.replace(line, '')
+          profile = profile.replace(
+              'fun ProfileScreen(\n    vm: AppViewModel,\n    onOpenBusiness: () -> Unit = {},\n    onOpenRewards: () -> Unit = {},\n    onOpenRewardsAdmin: () -> Unit = {},\n)',
+              'fun ProfileScreen(\n    vm: AppViewModel,\n    onOpenRewards: () -> Unit = {},\n)',
+          )
+          profile = profile.replace('''            if (BuildConfig.ADMIN_TOOLS) {
+                item {
+                    MenuCard(
+                        Icons.Default.AdminPanelSettings,
+                        "Laboratório Rewards",
+                        "Simule treinos, missões, saldo e a experiência do usuário",
+                        onClick = onOpenRewardsAdmin,
+                    )
+                }
+            }
+''', '')
+          profile = profile.replace('''            if (BuildConfig.COMMERCIAL_EDITION) {
+                item {
+                    MenuCard(
+                        Icons.Default.BusinessCenter,
+                        "Painel Business",
+                        "Planos, licenças e preparação da academia",
+                        onClick = onOpenBusiness,
+                    )
+                }
+            }
+''', '')
+          write(profile_path, profile)
+
+          gradle_path = Path('app/build.gradle.kts')
+          gradle = read(gradle_path)
+          gradle = gradle.replace('        buildConfigField("boolean", "COMMERCIAL_EDITION", "false")\n', '')
+          gradle = gradle.replace('        buildConfigField("boolean", "ADMIN_TOOLS", "false")\n', '')
+          write(gradle_path, gradle)
+
+          vm_path = Path('app/src/main/java/com/liftly/app/ui/AppViewModel.kt')
+          vm = read(vm_path)
+          vm = vm.replace('import com.liftly.app.domain.WorkoutRewardMetrics\n', '')
+          vm = re.sub(
+              r'\n\s*fun adminGrantRewards\(.*?\n\s*fun updateWeight',
+              '\n    fun updateWeight',
+              vm,
+              flags=re.S,
+          )
+          write(vm_path, vm)
+
+          repo_path = Path('app/src/main/java/com/liftly/app/data/LiftlyRepository.kt')
+          repo = read(repo_path)
+          repo = re.sub(
+              r'\n\s*suspend fun adminGrantRewards\(.*?\n\s*suspend fun saveWeight',
+              '\n    suspend fun saveWeight',
+              repo,
+              flags=re.S,
+          )
+          write(repo_path, repo)
+
+          store_path = Path('app/src/main/java/com/liftly/app/data/LiftlyRewardsStore.kt')
+          store = read(store_path)
+          store = store.replace('import java.util.UUID\n', '')
+          store = re.sub(
+              r'\n\s*suspend fun adminGrant\(.*?\n\s*internal suspend fun initializeInTransaction',
+              '\n    internal suspend fun initializeInTransaction',
+              store,
+              flags=re.S,
+          )
+          write(store_path, store)
+
+          dao_path = Path('app/src/main/java/com/liftly/app/data/LiftlyDao.kt')
+          dao = read(dao_path)
+          dao = re.sub(
+              r'\n\s*@Query\("UPDATE reward_missions SET progress = MIN\(target, MAX\(0, :progress\)\), completedAt = NULL WHERE id = :id"\)\n\s*suspend fun adminSetRewardMissionProgress\(id: String, progress: Int\): Int',
+              '',
+              dao,
+          )
+          dao = re.sub(
+              r'\n\s*@Query\("UPDATE reward_missions SET progress = 0, completedAt = NULL WHERE periodStart <= :at AND periodEnd > :at"\)\n\s*suspend fun adminResetCurrentRewardMissions\(at: Long\): Int',
+              '',
+              dao,
+          )
+          write(dao_path, dao)
+          PY
+
+          rm -f .liftly-finalize-trigger
+          rm -f .github/workflows/finalize-liftly-153.yml
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Verify retired identifiers are absent
+        shell: bash
+        run: |
+          if grep -RniE --exclude-dir=.git --exclude='*.apk' '(Liftly[ -]+Pessoal|Liftly[ -]+Business|Liftly[ -]+Admin|AniPresence|COMMERCIAL_EDITION|ADMIN_TOOLS|com\.liftly\.app\.commercial|AdminPreview|onOpenAdmin|adminGrant|adminUnlock|adminSimulate|adminComplete|adminReset)' .; then
+            echo 'Retired identifiers remain in the repository.' >&2
+            exit 1
+          fi
+
+      - name: Build Liftly 1.5.3
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Publish APK in branch
+        if: steps.cleanup.outputs.changed == 'true'
+        shell: bash
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk Liftly-v1.5.3.apk
+          test -s Liftly-v1.5.3.apk
+          sha256sum Liftly-v1.5.3.apk
+
+      - name: Unit tests
+        continue-on-error: true
+        shell: bash
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Commit finalized repository
+        if: steps.cleanup.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Finaliza Liftly 1.5.3"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
