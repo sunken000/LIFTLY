@@ -1,0 +1,128 @@
++        val membership = memberships(ordered)[workoutExerciseId]
++        if (membership?.position == 1) return null
++        val item = byId[workoutExerciseId] ?: return 60
++        if (membership?.position == 2) {
++            val partner = byId[membership.partnerWorkoutExerciseId]
++            return maxOf(item.restSeconds, partner?.restSeconds ?: 0).coerceIn(0, 3_600)
++        }
++        return item.restSeconds.coerceIn(0, 3_600)
++    }
++}
+diff --git a/app/src/test/java/com/liftly/app/domain/ExerciseIdentityResolverTest.kt b/app/src/test/java/com/liftly/app/domain/ExerciseIdentityResolverTest.kt
+new file mode 100644
+index 0000000..47378c0
+--- /dev/null
++++ b/app/src/test/java/com/liftly/app/domain/ExerciseIdentityResolverTest.kt
+@@ -0,0 +1,34 @@
++package com.liftly.app.domain
++
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class ExerciseIdentityResolverTest {
++    @Test
++    fun `classifies compound name with all relevant tags`() {
++        val identity = ExerciseIdentityResolver.resolve(
++            name = "Agachamento Búlgaro no Hack",
++            movementType = "Agachar unilateral",
++            muscleGroup = "Quadríceps",
++            secondaryMuscles = "Glúteos",
++            equipment = "Hack",
++            category = "Musculação",
++        )
++
++        assertEquals("squat", identity.movementPattern)
++        assertTrue(setOf("agachamento", "unilateral", "bulgaro", "hack", "quadriceps", "gluteos").all { it in identity.tags })
++    }
++
++    @Test
++    fun `incline chest press variations share the same family`() {
++        val dumbbells = ExerciseIdentityResolver.resolve("Supino inclinado com halteres", muscleGroup = "Peitoral", equipment = "Halteres")
++        val smith = ExerciseIdentityResolver.resolve("Supino inclinado Smith", muscleGroup = "Peitoral", equipment = "Smith")
++        val machine = ExerciseIdentityResolver.resolve("Supino inclinado máquina", muscleGroup = "Peitoral", equipment = "Máquina")
++
++        assertEquals("chest_press", dumbbells.family)
++        assertEquals(dumbbells.family, smith.family)
++        assertEquals(dumbbells.family, machine.family)
++        assertEquals("horizontal_push", machine.movementPattern)
++    }
++}
+diff --git a/app/src/test/java/com/liftly/app/domain/SupersetPlannerTest.kt b/app/src/test/java/com/liftly/app/domain/SupersetPlannerTest.kt
+new file mode 100644
+index 0000000..6b7ac08
+--- /dev/null
++++ b/app/src/test/java/com/liftly/app/domain/SupersetPlannerTest.kt
+@@ -0,0 +1,39 @@
++package com.liftly.app.domain
++
++import com.liftly.app.data.SessionSetEntity
++import com.liftly.app.data.WorkoutExerciseEntity
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertNull
++import org.junit.Test
++
++class SupersetPlannerTest {
++    private val first = WorkoutExerciseEntity("a", "w", "ea", 0, restSeconds = 45, setType = "Supersérie")
++    private val second = WorkoutExerciseEntity("b", "w", "eb", 1, restSeconds = 60, setType = "Supersérie")
++
++    @Test
++    fun `interleaves rounds and rests only after second exercise`() {
++        val sets = listOf(
++            set("a1", "a", "ea", "A", 1, 0),
++            set("a2", "a", "ea", "A", 2, 0),
++            set("b1", "b", "eb", "B", 1, 1),
++            set("b2", "b", "eb", "B", 2, 1),
++        )
++
++        assertEquals(listOf("a1", "b1", "a2", "b2"), SupersetPlanner.sequence(sets, listOf(first, second)).map { it.id })
++        assertNull(SupersetPlanner.restSecondsAfter(first.id, listOf(first, second)))
++        assertEquals(60, SupersetPlanner.restSecondsAfter(second.id, listOf(first, second)))
++    }
++
++    private fun set(id: String, workoutExerciseId: String, exerciseId: String, name: String, number: Int, order: Int) =
++        SessionSetEntity(
++            id = id,
++            sessionId = "session",
++            workoutExerciseId = workoutExerciseId,
++            exerciseId = exerciseId,
++            exerciseName = name,
++            setNumber = number,
++            reps = 8,
++            loadKg = 10.0,
++            exerciseOrder = order,
++        )
++}
+diff --git a/app/src/main/java/com/liftly/app/domain/AutomaticWarmupGenerator.kt b/app/src/main/java/com/liftly/app/domain/AutomaticWarmupGenerator.kt
+--- a/app/src/main/java/com/liftly/app/domain/AutomaticWarmupGenerator.kt
++++ b/app/src/main/java/com/liftly/app/domain/AutomaticWarmupGenerator.kt
+@@ -435,31 +435,17 @@
+             (!isCardio() && !isMobility() && !isTimeTracked() && !isDistanceTracked())
+     }
+ 
+-    private fun WarmupExerciseInput.isCompound(): Boolean {
+-        val movement = movementType.normalized()
+-        return COMPOUND_ALIASES.any(movement::contains)
+-    }
++    private fun WarmupExerciseInput.identity(): ExerciseIdentity = ExerciseIdentityResolver.resolve(
++        name = exerciseName,
++        movementType = movementType,
++        muscleGroup = muscleGroup,
++        secondaryMuscles = secondaryMuscles,
++        equipment = equipment,
++        category = category,
++    )
+ 
+-    private fun WarmupExerciseInput.canonicalPattern(): String {
+-        val movement = movementType.normalized()
+-        return when {
+-            movement.contains("empurrar com pernas") || movement.contains("leg press") -> "squat"
+-            movement.contains("empurrar vertical") -> "vertical_push"
+-            movement.contains("empurrar") || movement.contains("aducao horizontal") -> "horizontal_push"
+-            movement.contains("puxar vertical") || movement.contains("extensao de ombro") -> "vertical_pull"
+-            movement.contains("puxar horizontal") || movement.contains("remar") -> "horizontal_pull"
+-            movement.contains("agachar") || movement.contains("subir degrau") || movement.contains("afundo") -> "squat"
+-            movement.contains("hinge") || movement.contains("levantamento") || movement.contains("extensao de quadril") -> "hip_hinge"
+-            movement.contains("flexao de joelho") -> "knee_flexion"
+-            movement.contains("extensao de joelho") -> "knee_extension"
+-            movement.contains("flexao de cotovelo") || muscleGroup.normalized().contains("biceps") -> "elbow_flexion"
