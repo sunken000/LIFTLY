@@ -1,8 +1,6 @@
 name: Validate Liftly 1.6.2
 
 on:
-  push:
-    branches: [agent/liftly-162]
   pull_request:
     branches: [master]
 
@@ -13,9 +11,10 @@ jobs:
   validate-build-publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout source branch
         uses: actions/checkout@v4
         with:
+          ref: agent/liftly-162
           fetch-depth: 0
 
       - name: Setup Java 17
@@ -55,7 +54,6 @@ jobs:
           test -s Liftly-Wear-v1.6.2.apk
 
       - name: Publish validated 1.6.2 to branch
-        if: github.event_name == 'push'
         run: |
           rm -f tools/apply_liftly_162.py tools/trigger-162.txt
           rm -f .github/workflows/validate-liftly-162.yml
