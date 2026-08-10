@@ -1,0 +1,13 @@
+-            movement.contains("extensao de cotovelo") || muscleGroup.normalized().contains("triceps") -> "elbow_extension"
+-            movement.contains("panturr") || muscleGroup.normalized().contains("panturr") -> "calf"
+-            movement.contains("core") || muscleGroup.normalized().contains("core") || movement.contains("anti-") -> "core"
+-            isCardio() -> "cardio"
+-            isMobility() -> "mobility"
+-            else -> movement.substringBefore(" unilateral").ifBlank { muscleGroup.normalized().ifBlank { "general" } }
+-        }
+-    }
++    private fun WarmupExerciseInput.isCompound(): Boolean = identity().isCompound
++
++    private fun WarmupExerciseInput.canonicalPattern(): String = identity().movementPattern
+ 
+     private fun patternLabel(pattern: String): String = when (pattern) {
