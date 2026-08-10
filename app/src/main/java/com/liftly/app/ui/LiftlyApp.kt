@@ -228,10 +228,10 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     tonalElevation = 0.dp,
-                    shadowElevation = 8.dp,
+                    shadowElevation = 4.dp,
                     border = BorderStroke(
                         1.dp,
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.52f),
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.32f),
                     ),
                 ) {
                     Column {
@@ -273,7 +273,7 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                                             imageVector = destination.icon,
                                             contentDescription = destination.label,
                                             selected = selected,
-                                            intensity = if (selected) 0.55f else 0f,
+                                            intensity = 0f,
                                             size = 25.dp,
                                         )
                                     },

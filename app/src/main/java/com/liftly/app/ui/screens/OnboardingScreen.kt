@@ -89,7 +89,7 @@ fun OnboardingScreen(onFinish: (Boolean) -> Unit) {
             AnimatedContent(page, label = "onboarding") { index ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Box(Modifier.size(64.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                        NeonIcon(pages[index].icon, null, selected = true, intensity = 1.3f, size = 48.dp)
+                        NeonIcon(pages[index].icon, null, selected = true, intensity = 0f, size = 48.dp)
                     }
                     Text(
                         pages[index].title,

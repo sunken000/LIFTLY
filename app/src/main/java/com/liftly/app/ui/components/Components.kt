@@ -293,8 +293,8 @@ private fun AnimatedLiftlyBackdrop(
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    primary.copy(alpha = 0.15f),
-                    glow.copy(alpha = 0.065f),
+                    primary.copy(alpha = 0.09f),
+                    glow.copy(alpha = 0.035f),
                     Color.Transparent,
                 ),
                 center = upper,
@@ -308,8 +308,8 @@ private fun AnimatedLiftlyBackdrop(
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    secondary.copy(alpha = 0.11f),
-                    tertiary.copy(alpha = 0.045f),
+                    secondary.copy(alpha = 0.06f),
+                    tertiary.copy(alpha = 0.025f),
                     Color.Transparent,
                 ),
                 center = lower,
@@ -354,9 +354,9 @@ private fun AnimatedLiftlyBackdrop(
                 brush = Brush.horizontalGradient(
                     listOf(
                         Color.Transparent,
-                        (if (band == 0) secondary else primary).copy(alpha = 0.055f),
-                        glow.copy(alpha = 0.095f),
-                        (if (band == 0) primary else secondary).copy(alpha = 0.07f),
+                        (if (band == 0) secondary else primary).copy(alpha = 0.034f),
+                        glow.copy(alpha = 0.052f),
+                        (if (band == 0) primary else secondary).copy(alpha = 0.044f),
                         Color.Transparent,
                     ),
                 ),
@@ -376,7 +376,7 @@ private fun AnimatedLiftlyBackdrop(
                 drawPath(
                     path = filament,
                     color = (if ((line + band) % 2 == 0) primary else secondary).copy(
-                        alpha = 0.14f - distanceFromCenter * 0.055f,
+                        alpha = 0.085f - distanceFromCenter * 0.032f,
                     ),
                     style = Stroke(
                         width = (if (line == 4) 1.15f else 0.72f).dp.toPx(),
@@ -434,7 +434,7 @@ private fun AnimatedLiftlyBackdrop(
             val seed = index * 0.6180339f
             val xFraction = (seed + drift * (0.018f + (index % 3) * 0.006f)) % 1f
             val yFraction = (index * 0.173f + sin(angle * 0.45f + index) * 0.016f + 1f) % 1f
-            val alpha = 0.05f + (index % 4) * 0.012f
+            val alpha = 0.030f + (index % 4) * 0.007f
             drawCircle(
                 color = if (index % 3 == 0) secondary.copy(alpha = alpha) else primary.copy(alpha = alpha),
                 radius = (0.8f + index % 3 * 0.45f).dp.toPx(),
@@ -460,7 +460,7 @@ private fun StaticLiftlyBackdrop(
         val lower = Offset(size.width * 0.10f, size.height * 0.88f)
         drawCircle(
             brush = Brush.radialGradient(
-                listOf(primary.copy(alpha = 0.12f), Color.Transparent),
+                listOf(primary.copy(alpha = 0.07f), Color.Transparent),
                 center = upper,
                 radius = shortest * 0.60f,
             ),
@@ -469,7 +469,7 @@ private fun StaticLiftlyBackdrop(
         )
         drawCircle(
             brush = Brush.radialGradient(
-                listOf(secondary.copy(alpha = 0.08f), Color.Transparent),
+                listOf(secondary.copy(alpha = 0.05f), Color.Transparent),
                 center = lower,
                 radius = shortest * 0.46f,
             ),
@@ -627,15 +627,15 @@ fun NeonIcon(
         modifier = modifier.size(size),
         contentAlignment = Alignment.Center,
     ) {
-        if (safeIntensity > 0f) {
+        if (safeIntensity > 0f && selected) {
             Canvas(Modifier.matchParentSize()) {
                 val center = this.center
                 val radius = this.size.minDimension * 0.5f
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            glowColor.copy(alpha = (if (selected) 0.40f else 0.18f) * safeIntensity.coerceAtMost(1f)),
-                            glowColor.copy(alpha = 0.10f * safeIntensity.coerceAtMost(1.5f)),
+                            glowColor.copy(alpha = 0.16f * safeIntensity.coerceAtMost(1f)),
+                            glowColor.copy(alpha = 0.04f * safeIntensity.coerceAtMost(1.5f)),
                             Color.Transparent,
                         ),
                         center = center,
@@ -663,7 +663,7 @@ fun GlassCard(
     containerColor: Color = Color.Unspecified,
     contentColor: Color = Color.Unspecified,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    elevation: androidx.compose.ui.unit.Dp = 6.dp,
+    elevation: androidx.compose.ui.unit.Dp = 1.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -677,9 +677,9 @@ fun GlassCard(
     }
     val borderBrush = Brush.linearGradient(
         colors = listOf(
-            colors.primary.copy(alpha = 0.62f),
-            colors.secondary.copy(alpha = 0.22f),
-            colors.outlineVariant.copy(alpha = 0.50f),
+            colors.primary.copy(alpha = 0.18f),
+            colors.secondary.copy(alpha = 0.08f),
+            colors.outlineVariant.copy(alpha = 0.44f),
         ),
     )
 
@@ -694,7 +694,7 @@ fun GlassCard(
             shape = shape,
             color = resolvedContainer,
             contentColor = resolvedContentColor,
-            tonalElevation = 1.dp,
+            tonalElevation = 0.dp,
         ) {
             Column(
                 modifier = Modifier.padding(contentPadding),
@@ -722,7 +722,7 @@ fun InteractiveGlassCard(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (pressed && enabled) 0.976f else 1f,
+        targetValue = if (pressed && enabled) 0.99f else 1f,
         animationSpec = tween(durationMillis = if (pressed) 90 else 180, easing = FastOutSlowInEasing),
         label = "glass-card-press",
     )
@@ -742,7 +742,7 @@ fun InteractiveGlassCard(
             .then(accessibility)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
+                indication = androidx.compose.foundation.LocalIndication.current,
                 enabled = enabled,
                 role = Role.Button,
                 onClickLabel = onClickLabel,
@@ -773,7 +773,7 @@ fun GradientActionButton(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (pressed && enabled) 0.97f else 1f,
+        targetValue = if (pressed && enabled) 0.985f else 1f,
         animationSpec = tween(durationMillis = if (pressed) 80 else 170, easing = FastOutSlowInEasing),
         label = "gradient-action-press",
     )
@@ -790,11 +790,11 @@ fun GradientActionButton(
                 scaleY = scale
                 alpha = if (enabled) 1f else 0.48f
             }
-            .shadow(if (enabled) 9.dp else 0.dp, shape, clip = false)
+            .shadow(if (enabled) 2.dp else 0.dp, shape, clip = false)
             .clip(shape)
             .background(
                 Brush.linearGradient(
-                    colors = listOf(colors.primary, colors.tertiary, colors.secondary),
+                    colors = listOf(colors.primary, colors.tertiary),
                 ),
             )
             .then(accessibility)
