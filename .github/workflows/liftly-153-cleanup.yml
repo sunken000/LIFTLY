@@ -1,4 +1,5 @@
 name: Liftly 1.5.3 cleanup
+# trigger 2
 
 on:
   push:
@@ -42,7 +43,6 @@ jobs:
           def save(path, text):
               Path(path).write_text(text, encoding='utf-8')
 
-          # Remove independent/retired editions and their source trees.
           for directory in [
               'AniPresence',
               'app/src/business',
@@ -58,11 +58,9 @@ jobs:
           ]:
               Path(file_name).unlink(missing_ok=True)
 
-          # Remove every old root APK; the workflow publishes one canonical Liftly APK below.
           for apk in root.glob('*.apk'):
               apk.unlink()
 
-          # Single application, version 1.5.3 / code 35, no edition flavors or billing dependency.
           gradle_path = Path('app/build.gradle.kts')
           gradle = load(gradle_path)
           gradle = re.sub(
@@ -76,7 +74,6 @@ jobs:
           gradle = gradle.replace('    implementation("com.android.billingclient:billing-ktx:9.1.0")\n', '')
           save(gradle_path, gradle)
 
-          # Profile: only the regular Liftly experience remains.
           profile_path = Path('app/src/main/java/com/liftly/app/ui/screens/ProfileScreen.kt')
           profile = load(profile_path)
           for line in [
@@ -103,7 +100,6 @@ jobs:
           )
           save(profile_path, profile)
 
-          # Rewards model: remove the retired special viewer mode and control hook.
           models_path = Path('app/src/main/java/com/liftly/app/ui/rewards/RewardsUiModels.kt')
           models = load(models_path)
           models = re.sub(r'\nenum class RewardsViewerMode \{\n.*?\n\}\n', '\n', models, flags=re.S)
@@ -138,7 +134,6 @@ jobs:
           )
           save(rewards_path, rewards)
 
-          # Main navigation: remove retired routes/screens and keep Rewards as a normal destination.
           app_path = Path('app/src/main/java/com/liftly/app/ui/LiftlyApp.kt')
           app = load(app_path)
           app = '\n'.join(
@@ -188,7 +183,6 @@ jobs:
           )
           save(app_path, app)
 
-          # Remove testing-only reward mutation APIs from ViewModel/repository/store/DAO.
           vm_path = Path('app/src/main/java/com/liftly/app/ui/AppViewModel.kt')
           vm = load(vm_path)
           vm = vm.replace('import com.liftly.app.domain.WorkoutRewardMetrics\n', '')
@@ -235,7 +229,6 @@ jobs:
           )
           save(dao_path, dao)
 
-          # Canonical documentation: one app, one package, one downloadable APK.
           readme = '''# Liftly
 
 Aplicativo Android nativo, offline-first e em português para montar, organizar e acompanhar treinos de academia. Usa Kotlin, Jetpack Compose, Material Design 3, MVVM, Room, Navigation Compose, Coroutines/StateFlow, DataStore e WorkManager.
@@ -374,7 +367,6 @@ Consulte [Backup e privacidade](docs/BACKUP_E_PRIVACIDADE.md) e [Testes e limita
 '''
           save('docs/PATCH_NOTES_1.5.3.md', patch_153)
 
-          # Remove retired product names from historical Markdown without changing technical history otherwise.
           banned_markdown = re.compile(r'\b(?:Business|Admin|Pessoal|AniPresence)\b', re.I)
           for md in root.rglob('*.md'):
               text = md.read_text(encoding='utf-8')
@@ -383,7 +375,6 @@ Consulte [Backup e privacidade](docs/BACKUP_E_PRIVACIDADE.md) e [Testes e limita
               if md.name == 'PATCH_NOTES_1.5.0.md':
                   text = re.sub(r'\n## 👤 APK normal.*?(?=\n## |\n---|\Z)', '\n', text, flags=re.S)
                   text = re.sub(r'\n## 🧪 APK .*?(?=\n## |\n---|\Z)', '\n', text, flags=re.S)
-              # Drop isolated historical lines naming retired editions.
               lines = []
               for line in text.splitlines():
                   if banned_markdown.search(line):
@@ -391,7 +382,6 @@ Consulte [Backup e privacidade](docs/BACKUP_E_PRIVACIDADE.md) e [Testes e limita
                   lines.append(line)
               md.write_text('\n'.join(lines).rstrip() + '\n', encoding='utf-8')
 
-          # Ensure source/config no longer contains edition identifiers.
           banned = re.compile(r'\b(?:Business|Admin|Pessoal|AniPresence)\b|COMMERCIAL_EDITION|ADMIN_TOOLS|com\.liftly\.app\.commercial', re.I)
           leftovers = []
           for path in root.rglob('*'):
