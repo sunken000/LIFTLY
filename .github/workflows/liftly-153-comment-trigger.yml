@@ -6,12 +6,22 @@ on:
 
 permissions:
   contents: write
+  issues: write
+
+concurrency:
+  group: liftly-153-consolidation
+  cancel-in-progress: false
 
 jobs:
   consolidate:
     if: github.event.comment.body == '/liftly-153'
     runs-on: ubuntu-latest
     steps:
+      - name: Signal start
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue comment 2 --repo sunken000/LIFTLY --body 'Liftly 1.5.3: execução iniciada.'
+
       - uses: actions/checkout@v4
         with:
           ref: master
@@ -52,3 +62,15 @@ jobs:
           git add -A
           git commit -m "Consolida Liftly 1.5.3"
           git push origin master
+
+      - name: Signal success
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue comment 2 --repo sunken000/LIFTLY --body 'Liftly 1.5.3: consolidação concluída.'
+
+      - name: Signal failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue comment 2 --repo sunken000/LIFTLY --body 'Liftly 1.5.3: consolidação falhou; revisar execução.'
