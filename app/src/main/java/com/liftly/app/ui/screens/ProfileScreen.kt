@@ -114,6 +114,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.liftly.app.BuildConfig
 import com.liftly.app.data.ExerciseEntity
 import com.liftly.app.data.BodyPhotoEntity
 import com.liftly.app.data.SessionEntity
@@ -886,6 +887,25 @@ fun ProfileScreen(
                 OutlinedButton(onClick = { showDelete = true }, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Default.DeleteForever, null)
                     Text("Apagar todos os dados", Modifier.padding(start = 8.dp))
+                }
+            }
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                ) {
+                    Text(
+                        "LIFTLY ${BuildConfig.VERSION_NAME}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        "build ${BuildConfig.VERSION_CODE}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
+                    )
                 }
             }
             item { Spacer(Modifier.height(100.dp)) }

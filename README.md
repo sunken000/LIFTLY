@@ -2,15 +2,29 @@
 
 Aplicativo Android nativo, offline-first e em português para montar, organizar e acompanhar treinos de academia. O projeto usa Kotlin, Jetpack Compose, Material Design 3, MVVM, Room, Navigation Compose, Coroutines/StateFlow, DataStore e WorkManager.
 
-## Versão atual — 1.5.5
+## Versão atual — 1.6.0
 
-- **versionName:** `1.5.5`
-- **versionCode:** `37`
+- **versionName:** `1.6.0`
+- **versionCode:** `38`
 - **applicationId:** `com.liftly.app`
 - **Android mínimo:** Android 8.0 / API 26
 - **targetSdk / compileSdk:** 36
 
 O repositório mantém uma única aplicação Android: **Liftly**.
+
+## Novidades da 1.6.0
+
+A 1.6.0 aprofunda o Liftly como sistema de treino:
+
+- Coach fecha o ciclo e ajusta a próxima prescrição após a sessão quando os dados sustentam aumento, manutenção, redução ou deload;
+- sessão focada em uma série por vez, com histórico anterior visível;
+- aquecimento usa a mesma superfície e o mesmo fluxo de conclusão das séries normais, sem entrar no volume oficial;
+- relatório pós-treino com duração, volume, recordes, comparação e card PNG compartilhável;
+- Progresso interpreta aderência, tendência de volume, possíveis estagnações e distribuição de séries;
+- Rewards retroativas recalculadas a partir de treinos antigos com ledger idempotente;
+- Rewards passam a priorizar marcos semanais/mensais e não punem descanso ou quebra de sequência;
+- módulo Wear OS com série ativa, carga, reps, RIR, conclusão remota e frequência cardíaca via Health Services;
+- ProfileInstaller, Baseline Profile, Macrobenchmark, teste visual e CI ampliado.
 
 ## Novidades da 1.5.5
 

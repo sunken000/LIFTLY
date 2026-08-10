@@ -31,11 +31,15 @@ import com.liftly.app.integration.healthconnect.AndroidHealthConnectRepository
 import com.liftly.app.integration.healthconnect.WorkoutHealthExportMapper
 import com.liftly.app.integration.healthconnect.WorkoutHealthExportPreparation
 import com.liftly.app.domain.ParsedWorkout
+import com.liftly.app.domain.WorkoutReport
+import com.liftly.app.domain.WorkoutReportBuilder
+import com.liftly.app.integration.wear.WearSessionBridge
 import com.liftly.app.widget.TodayWorkoutWidgetUpdater
 import com.liftly.app.ui.theme.PaletteColorCodec
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -78,6 +82,8 @@ class AppViewModel(
     val feedback: StateFlow<ActionFeedback?> = _feedback
     private val _lastSummary = MutableStateFlow<SessionSummary?>(null)
     val lastSummary: StateFlow<SessionSummary?> = _lastSummary
+    private val _lastReport = MutableStateFlow<WorkoutReport?>(null)
+    val lastReport: StateFlow<WorkoutReport?> = _lastReport
     private val _automaticWarmupSessions = MutableStateFlow<Set<String>>(emptySet())
     val automaticWarmupSessions: StateFlow<Set<String>> = _automaticWarmupSessions
     private val _sessionWarmupStates =
@@ -111,6 +117,13 @@ class AppViewModel(
             preferencesRepository.preferences.collect { prefs ->
                 lastPreferences = prefs
                 if (!_ready.value && _initializationError.value == null) initializeApplication(prefs.demoEnabled)
+            }
+        }
+        viewModelScope.launch {
+            combine(repository.sessions, repository.sessionSets) { activeSessions, activeSets ->
+                activeSessions to activeSets
+            }.collect { (activeSessions, activeSets) ->
+                WearSessionBridge.publish(getApplication<Application>(), activeSessions, activeSets)
             }
         }
     }
@@ -348,10 +361,18 @@ class AppViewModel(
         // guarantees that every accepted set update is committed before the session is read.
         setUpdateQueue.awaitIdle()
         val setsBeforeFinish = sessionSets.value.filter { it.sessionId == sessionId }
+        val reportSetsSnapshot = sessionSets.value.toList()
+        val reportSessionsSnapshot = sessions.value.toList()
         val summary = repository.finishSession(sessionId)
         clearSessionRuntimeState(sessionId)
         WorkoutTrackingService.stop(getApplication<Application>())
         _lastSummary.value = summary
+        _lastReport.value = WorkoutReportBuilder.build(
+            summary = summary,
+            currentSets = setsBeforeFinish,
+            allSets = reportSetsSnapshot,
+            sessions = reportSessionsSnapshot,
+        )
         _feedback.value = ActionFeedback(
             if (summary.isTestMode) "Teste finalizado sem alterar seu progresso."
             else buildString {

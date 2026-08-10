@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.6.0 — 2026-08-10
+
+- Coach adaptativo agora persiste a próxima prescrição quando há evidência suficiente.
+- Sessão e aquecimento unificados em uma experiência focada, uma etapa por vez.
+- Relatório pós-treino e card compartilhável.
+- Progresso interpretativo com tendências e alertas de estagnação.
+- Rewards retroativas para treinos históricos, com proteção contra duplicidade.
+- Rewards reorganizadas em marcos semanais e mensais sem punição por descanso.
+- Companion Wear OS com Data Layer e frequência cardíaca via Health Services.
+- Baseline Profile, Macrobenchmark, screenshot smoke test e ProfileInstaller.
+- `versionName` 1.6.0 / `versionCode` 38.
+
 ## 1.5.5 — 2026-08-10
 
 - `versionName` atualizado para **1.5.5**.

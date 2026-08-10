@@ -32,8 +32,8 @@ android {
         applicationId = "com.liftly.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 37
-        versionName = "1.5.5"
+        versionCode = 38
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -95,6 +95,8 @@ dependencies {
     implementation("androidx.room:room-ktx:2.8.4")
     implementation("androidx.work:work-runtime:2.11.2")
     implementation("androidx.health.connect:connect-client:1.1.0")
+    implementation("com.google.android.gms:play-services-wearable:20.0.1")
+    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
     implementation("com.google.code.gson:gson:2.14.0")
     implementation("com.google.zxing:core:3.5.4")
     ksp("androidx.room:room-compiler:2.8.4")

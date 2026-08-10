@@ -96,8 +96,6 @@ data class RewardGrant(
 
 internal object RewardMissionFactory {
     fun current(date: LocalDate, zoneId: ZoneId): List<RewardMissionEntity> {
-        val dayStart = date.atStartOfDay(zoneId).toInstant().toEpochMilli()
-        val dayEnd = date.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
         val weekDate = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val weekStart = weekDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val weekEnd = weekDate.plusWeeks(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
@@ -107,12 +105,10 @@ internal object RewardMissionFactory {
         val monthEnd = month.plusMonths(1).atDay(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
 
         return listOf(
-            mission("daily.$date.workout", RewardPeriod.DAILY, RewardMetric.WORKOUT_COMPLETED, "Treino do dia", "Conclua um treino válido hoje.", 1, 50, 20, dayStart, dayEnd, 10),
-            mission("daily.$date.rir", RewardPeriod.DAILY, RewardMetric.RIR_SET_RECORDED, "Treino consciente", "Registre o RIR em 3 séries concluídas.", 3, 30, 10, dayStart, dayEnd, 11),
-            mission("weekly.$weekDate.workouts", RewardPeriod.WEEKLY, RewardMetric.WORKOUT_COMPLETED, "Ritmo semanal", "Conclua 3 treinos nesta semana.", 3, 150, 50, weekStart, weekEnd, 20),
-            mission("weekly.$weekDate.complete", RewardPeriod.WEEKLY, RewardMetric.COMPLETE_WORKOUT, "Plano cumprido", "Finalize 2 fichas sem deixar séries pendentes.", 2, 100, 35, weekStart, weekEnd, 21),
-            mission("monthly.$month.workouts", RewardPeriod.MONTHLY, RewardMetric.WORKOUT_COMPLETED, "Consistência mensal", "Conclua 12 treinos neste mês.", 12, 400, 150, monthStart, monthEnd, 30),
-            mission("monthly.$month.records", RewardPeriod.MONTHLY, RewardMetric.PERSONAL_RECORD, "Evolução mensurável", "Registre 3 novos recordes pessoais.", 3, 200, 75, monthStart, monthEnd, 31),
+            mission("weekly.$weekDate.workouts", RewardPeriod.WEEKLY, RewardMetric.WORKOUT_COMPLETED, "Semana consistente", "Conclua 3 treinos válidos nesta semana, nos dias que fizerem sentido para você.", 3, 120, 35, weekStart, weekEnd, 20),
+            mission("weekly.$weekDate.rir", RewardPeriod.WEEKLY, RewardMetric.RIR_SET_RECORDED, "Registro de qualidade", "Registre o RIR em 6 séries concluídas ao longo da semana.", 6, 80, 25, weekStart, weekEnd, 21),
+            mission("monthly.$month.workouts", RewardPeriod.MONTHLY, RewardMetric.WORKOUT_COMPLETED, "Bloco consistente", "Conclua 10 treinos válidos neste mês.", 10, 300, 100, monthStart, monthEnd, 30),
+            mission("monthly.$month.records", RewardPeriod.MONTHLY, RewardMetric.PERSONAL_RECORD, "Evolução mensurável", "Registre 2 novos recordes pessoais no mês.", 2, 150, 50, monthStart, monthEnd, 31),
         )
     }
 

@@ -4,4 +4,7 @@
     <cache-path
         name="shared_workouts"
         path="shared_workouts/" />
+    <cache-path
+        name="workout_reports"
+        path="workout_reports/" />
 </paths>

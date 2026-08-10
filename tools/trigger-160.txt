@@ -1,1 +1,0 @@
-validate Liftly 1.6.0

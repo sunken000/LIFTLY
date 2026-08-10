@@ -109,7 +109,10 @@ internal fun SessionWarmupBlock(
             }
         }
 
-        steps.forEachIndexed { index, step ->
+        val firstPendingId = steps.firstOrNull { it.id !in completedIds }?.id
+        val visibleSteps = steps.filter { it.id in completedIds || it.id == firstPendingId }
+        visibleSteps.forEach { step ->
+            val index = steps.indexOf(step)
             val completed = step.id in completedIds
             val thisTimerActive = activeTimerStepId == step.id && timerRunning
             TrainingSetSurface(

@@ -117,6 +117,7 @@ import com.liftly.app.ui.components.GlassCard
 import com.liftly.app.ui.components.GradientActionButton
 import com.liftly.app.ui.components.NeonIcon
 import com.liftly.app.ui.components.PlateCalculatorSheet
+import com.liftly.app.ui.components.TrainingSetSurface
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -660,6 +661,9 @@ fun SessionScreen(
     }
 
     val nextWorkSet = sets.firstOrNull { !it.completed }
+    val visibleExerciseGroups = nextWorkSet?.workoutExerciseId?.let { focusedId ->
+        orderedExerciseGroups.filter { it.first().workoutExerciseId == focusedId }
+    } ?: orderedExerciseGroups
     val nextWarmupStep = if (showAutomaticWarmup) {
         generalWarmupSteps.firstOrNull { it.id !in warmupCompletedIds }
             ?: nextWorkSet?.workoutExerciseId?.let { workoutExerciseId ->
@@ -833,7 +837,7 @@ fun SessionScreen(
                     )
                 }
             }
-            orderedExerciseGroups.forEachIndexed { groupIndex, exerciseSets ->
+            visibleExerciseGroups.forEachIndexed { groupIndex, exerciseSets ->
                 val workoutExerciseId = exerciseSets.first().workoutExerciseId
                 val currentExercise = exercises.firstOrNull { it.id == exerciseSets.first().exerciseId }
                 val plannedWorkoutItem = sessionWorkoutItems.firstOrNull { it.id == workoutExerciseId }
@@ -843,7 +847,7 @@ fun SessionScreen(
                     ExerciseSubstitutionEngine.equipmentFamilyLabels(it.equipment)
                 }.orEmpty().filterNot { it == "Peso corporal" || it == "Sem equipamento" }
                 val warmupBeforeExercise = exerciseWarmupSteps[workoutExerciseId].orEmpty()
-                val isFirstGroupForWorkoutItem = orderedExerciseGroups
+                val isFirstGroupForWorkoutItem = visibleExerciseGroups
                     .indexOfFirst { it.first().workoutExerciseId == workoutExerciseId } == groupIndex
                 if (showAutomaticWarmup && warmupBeforeExercise.isNotEmpty() && isFirstGroupForWorkoutItem) {
                     item(key = "$workoutExerciseId-automatic-warmup") {
@@ -952,10 +956,17 @@ fun SessionScreen(
                         )
                     }
                 }
-                items(exerciseSets, key = { it.id }) { set ->
+                val visibleSets = exerciseSets.filter { it.completed || it.id == nextWorkSet?.id }
+                items(visibleSets, key = { it.id }) { set ->
                     val equipment = exercises.firstOrNull { it.id == set.exerciseId }?.equipment.orEmpty()
+                    val previousSet = allSets.asSequence()
+                        .filter { it.sessionId != sessionId && it.exerciseId == set.exerciseId && it.completed }
+                        .maxByOrNull { it.completedAt ?: 0L }
                     SessionSetRow(
                         set = set,
+                        isFocus = nextWorkSet?.id == set.id,
+                        previousLoadKg = previousSet?.loadKg,
+                        previousReps = previousSet?.reps,
                         supportsPlateCalculator = equipment.contains("barra", ignoreCase = true) ||
                             equipment.contains("smith", ignoreCase = true) ||
                             equipment.contains("anilha", ignoreCase = true),
@@ -1208,48 +1219,78 @@ fun SessionScreen(
 @Composable
 private fun SessionSetRow(
     set: SessionSetEntity,
+    isFocus: Boolean,
+    previousLoadKg: Double?,
+    previousReps: Int?,
     supportsPlateCalculator: Boolean,
     onChange: (Int, Double, Boolean, Int?, Int) -> Unit,
 ) {
-    // O rascunho visível não deve voltar a um valor antigo enquanto o Room confirma teclas anteriores.
     var repsText by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(set.reps.toString()) }
-    var loadText by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(set.loadKg.toClean()) }
+    var loadText by rememberSaveable(set.id, set.exerciseId, set.loadKg) { mutableStateOf(set.loadKg.toClean()) }
     var rir by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(set.rir) }
     var painLevel by rememberSaveable(set.id, set.exerciseId) { mutableIntStateOf(set.painLevel) }
     var showEffort by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(false) }
     var showPlateCalculator by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(false) }
-    Card(colors = CardDefaults.cardColors(containerColor = if (set.completed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant)) {
-        Column(Modifier.fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("${set.setNumber}", Modifier.size(28.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                OutlinedTextField(
-                    repsText,
-                    onValueChange = { value -> repsText = value.filter(Char::isDigit).take(3); onChange(repsText.toIntOrNull() ?: 0, loadText.replace(',', '.').toDoubleOrNull() ?: 0.0, false, rir, painLevel) },
-                    label = { Text(if (set.trackingMode == "Tempo") "Segundos" else if (set.trackingMode == "Distância") "Metros" else "Reps") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f)
-                )
-                OutlinedTextField(
-                    loadText,
-                    onValueChange = { value -> loadText = value.filter { it.isDigit() || it == ',' || it == '.' }.take(6); onChange(repsText.toIntOrNull() ?: 0, loadText.replace(',', '.').toDoubleOrNull() ?: 0.0, false, rir, painLevel) },
-                    label = { Text("kg") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f)
-                )
-                Checkbox(checked = set.completed, onCheckedChange = { onChange(repsText.toIntOrNull() ?: 0, loadText.replace(',', '.').toDoubleOrNull() ?: 0.0, true, rir, painLevel) })
+
+    fun persist(toggle: Boolean = false) {
+        onChange(
+            repsText.toIntOrNull() ?: 0,
+            loadText.replace(',', '.').toDoubleOrNull() ?: 0.0,
+            toggle,
+            rir,
+            painLevel,
+        )
+    }
+
+    TrainingSetSurface(
+        numberLabel = set.setNumber.toString().padStart(2, '0'),
+        title = set.exerciseName,
+        subtitle = if (isFocus) "SÉRIE ATUAL" else "Série concluída",
+        completed = set.completed,
+        onCompletedChange = { persist(toggle = true) },
+        badge = if (isFocus && !set.completed) "AGORA" else null,
+    ) {
+        if (isFocus && previousLoadKg != null && previousReps != null) {
+            Text(
+                "Anterior: ${previousLoadKg.toClean()} kg × $previousReps reps",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                repsText,
+                onValueChange = { value ->
+                    repsText = value.filter(Char::isDigit).take(3)
+                    persist()
+                },
+                label = { Text(if (set.trackingMode == "Tempo") "Segundos" else if (set.trackingMode == "Distância") "Metros" else "Reps") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+                enabled = !set.completed,
+            )
+            OutlinedTextField(
+                loadText,
+                onValueChange = { value ->
+                    loadText = value.filter { it.isDigit() || it == ',' || it == '.' }.take(6)
+                    persist()
+                },
+                label = { Text("kg") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+                enabled = !set.completed,
+            )
+        }
+        if (supportsPlateCalculator && set.isCoachRepetitionBased() && !set.completed) {
+            val loadValue = loadText.replace(',', '.').toDoubleOrNull() ?: 0.0
+            TextButton(onClick = { showPlateCalculator = true }, enabled = loadValue > 0.0) {
+                Icon(Icons.Default.FitnessCenter, contentDescription = null)
+                Text("Calcular anilhas", Modifier.padding(start = 7.dp))
             }
-            if (supportsPlateCalculator && set.isCoachRepetitionBased()) {
-                val loadValue = loadText.replace(',', '.').toDoubleOrNull() ?: 0.0
-                TextButton(onClick = { showPlateCalculator = true }, enabled = loadValue > 0.0) {
-                    Icon(Icons.Default.FitnessCenter, contentDescription = null)
-                    Text("Calcular anilhas", Modifier.padding(start = 7.dp))
-                }
-            }
+        }
+        if (!set.completed) {
             TextButton(onClick = { showEffort = !showEffort }) {
-                Text(
-                    if (rir == null && painLevel == 0) "Informar esforço (opcional)"
-                    else "RIR ${rir?.toString() ?: "—"} • dor $painLevel/10"
-                )
+                Text(if (rir == null && painLevel == 0) "RIR e dor (opcional)" else "RIR ${rir?.toString() ?: "—"} • dor $painLevel/10")
             }
             AnimatedVisibility(showEffort) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -1258,11 +1299,8 @@ private fun SessionSetRow(
                         items(listOf<Int?>(null, 0, 1, 2, 3, 4, 5)) { value ->
                             FilterChip(
                                 selected = rir == value,
-                                onClick = {
-                                    rir = value
-                                    onChange(repsText.toIntOrNull() ?: 0, loadText.replace(',', '.').toDoubleOrNull() ?: 0.0, false, rir, painLevel)
-                                },
-                                label = { Text(if (value == null) "Não sei" else if (value == 5) "5+" else value.toString()) }
+                                onClick = { rir = value; persist() },
+                                label = { Text(if (value == null) "Não sei" else if (value == 5) "5+" else value.toString()) },
                             )
                         }
                     }
@@ -1270,18 +1308,16 @@ private fun SessionSetRow(
                     Slider(
                         value = painLevel.toFloat(),
                         onValueChange = { painLevel = it.toInt() },
-                        onValueChangeFinished = {
-                            onChange(repsText.toIntOrNull() ?: 0, loadText.replace(',', '.').toDoubleOrNull() ?: 0.0, false, rir, painLevel)
-                        },
+                        onValueChangeFinished = { persist() },
                         valueRange = 0f..10f,
                         steps = 9,
                     )
-                    Text(
-                        "RIR é quantas repetições ainda caberiam com boa técnica. Dor não é a queimação muscular normal.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 }
+            }
+        }
+        if (isFocus && !set.completed) {
+            Button(onClick = { persist(toggle = true) }, modifier = Modifier.fillMaxWidth()) {
+                Text("Concluir série", fontWeight = FontWeight.Black)
             }
         }
     }

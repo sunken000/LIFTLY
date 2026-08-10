@@ -131,9 +131,9 @@ fun RewardsScreen(
                 },
                 title = {
                     Column {
-                        Text("Rewards", fontWeight = FontWeight.Bold)
+                        Text("Conquistas", fontWeight = FontWeight.Bold)
                         Text(
-                            "Sua consistência tem valor",
+                            "Seu histórico vira identidade, não obrigação",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -365,7 +365,7 @@ private fun RewardsAccountCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Rounded.LocalFireDepartment, contentDescription = null, tint = MaterialTheme.liftlyColors.warning)
                 Text(
-                    "${account.workoutStreak} semanas na sequência",
+                    "${account.workoutStreak} semanas cumprindo sua meta",
                     Modifier.padding(start = 8.dp).weight(1f),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
@@ -525,11 +525,11 @@ private fun MissionsSection(
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SectionHeader(
-            title = "Missões",
-            subtitle = "Objetivos ajustados à sua rotina de treino.",
+            title = "Marcos de treino",
+            subtitle = "Metas semanais e mensais, sem punição por perder um dia.",
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MissionPeriod.entries.forEach { period ->
+            MissionPeriod.entries.filterNot { it == MissionPeriod.Daily }.forEach { period ->
                 FilterChip(
                     selected = selectedPeriod == period,
                     onClick = { onPeriodSelected(period) },
@@ -560,7 +560,7 @@ private fun MissionsSection(
             }
         }
         Text(
-            "As recompensas consideram treinos concluídos e registros válidos. Um mesmo treino não gera moedas duplicadas.",
+            "Treinos antigos também entram no histórico de recompensas. Não existe perda de XP por descanso ou por quebrar sequência, e um mesmo treino nunca paga duas vezes.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -83,6 +83,7 @@ import com.liftly.app.ui.screens.ExercisesScreen
 import com.liftly.app.ui.screens.MusicScreen
 import com.liftly.app.ui.screens.MusicScreenState
 import com.liftly.app.ui.screens.OnboardingScreen
+import com.liftly.app.ui.screens.PostWorkoutReportScreen
 import com.liftly.app.ui.screens.ProfileScreen
 import com.liftly.app.ui.screens.ProgressScreen
 import com.liftly.app.ui.screens.SessionScreen
@@ -362,6 +363,14 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
             composable("calendar") {
                 CalendarScreen(vm) { navController.popBackStack() }
             }
+            composable("report") {
+                PostWorkoutReportScreen(vm = vm) {
+                    navController.navigate("today") {
+                        popUpTo("report") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
             composable(
                 route = "session/{sessionId}?warmup={warmup}",
                 arguments = listOf(
@@ -382,13 +391,9 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                         }
                     },
                     onFinished = {
-                        if (!navController.popBackStack("today", false)) {
-                            navController.navigate("today") {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    inclusive = false
-                                }
-                                launchSingleTop = true
-                            }
+                        navController.navigate("report") {
+                            popUpTo("today") { inclusive = false }
+                            launchSingleTop = true
                         }
                     },
                 )
@@ -409,7 +414,7 @@ private fun RewardsDestination(
         mutableStateOf(RewardCategory.All.name)
     }
     var selectedMissionPeriodName by rememberSaveable {
-        mutableStateOf(MissionPeriod.Daily.name)
+        mutableStateOf(MissionPeriod.Weekly.name)
     }
     val selectedCategory = RewardCategory.entries
         .firstOrNull { it.name == selectedCategoryName }
