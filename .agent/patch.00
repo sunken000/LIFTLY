@@ -1,0 +1,108 @@
+diff --git a/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt b/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt
+index de92c2c..8ceee0a 100644
+--- a/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt
++++ b/app/src/main/java/com/liftly/app/data/LiftlyRepository.kt
+@@ -365,6 +365,23 @@ class LiftlyRepository(
+         persistWorkoutExerciseOrder(WorkoutExerciseOrder.moveBefore(dao.workoutExercises(workoutId), id, beforeId))
+     }
+ 
++    suspend fun setSupersetPair(workoutId: String, firstId: String, secondId: String, enabled: Boolean) = database.withTransaction {
++        val ordered = normalizedWorkoutExercises(workoutId)
++        val firstIndex = ordered.indexOfFirst { it.id == firstId }
++        val secondIndex = ordered.indexOfFirst { it.id == secondId }
++        require(firstIndex >= 0 && secondIndex == firstIndex + 1) { "O bi-set precisa usar dois exercícios consecutivos." }
++
++        val updated = ordered.mapIndexed { index, item ->
++            when {
++                item.id == firstId || item.id == secondId -> item.copy(setType = if (enabled) "Supersérie" else "Normal")
++                enabled && index == firstIndex - 1 && item.setType.isSupersetType() -> item.copy(setType = "Normal")
++                enabled && index == secondIndex + 1 && item.setType.isSupersetType() -> item.copy(setType = "Normal")
++                else -> item
++            }
++        }
++        dao.upsertWorkoutExercises(updated)
++    }
++
+     suspend fun scheduleWorkout(date: LocalDate, workoutId: String) = database.withTransaction {
+         requireNotNull(dao.workout(workoutId)) { "Treino não encontrado." }
+         dao.deleteRestForDate(date.toString())
+@@ -453,14 +470,14 @@ class LiftlyRepository(
+         rir: Int? = item.rir,
+         painLevel: Int = item.painLevel
+     ) = database.withTransaction {
+-        // Merge with the latest row so a nearby text edit cannot overwrite the
+-        // completion state written by a checkbox tap from an older UI snapshot.
++        // Merge with the latest row so nearby text edits cannot overwrite a newer completion state.
+         val current = dao.sessionSet(item.id) ?: item
+         val value = reps.coerceAtLeast(0)
++        val normalizedLoad = load.takeIf(Double::isFinite)?.coerceAtLeast(0.0) ?: 0.0
+         val completed = if (toggleCompletion) !current.completed else current.completed
+-        dao.upsertSessionSet(current.copy(
++        val updatedCurrent = current.copy(
+             reps = value,
+-            loadKg = load.coerceAtLeast(0.0),
++            loadKg = normalizedLoad,
+             completed = completed,
+             completedAt = when {
+                 !toggleCompletion -> current.completedAt
+@@ -471,7 +488,34 @@ class LiftlyRepository(
+             distanceMeters = if (current.trackingMode == "Distância") value.toDouble() else current.distanceMeters,
+             rir = rir?.coerceIn(0, 10),
+             painLevel = painLevel.coerceIn(0, 10)
+-        ))
++        )
++        dao.upsertSessionSet(updatedCurrent)
++
++        // A carga digitada na primeira série vira o padrão das próximas séries ainda intactas.
++        // Séries já concluídas ou alteradas manualmente (valor diferente do padrão anterior) são preservadas.
++        if (current.setNumber == 1 && current.trackingMode == "Repetições" && kotlin.math.abs(normalizedLoad - current.loadKg) > LOAD_EPSILON) {
++            val inherited = dao.sessionSets(current.sessionId)
++                .filter { sibling ->
++                    sibling.id != current.id &&
++                        sibling.workoutExerciseId == current.workoutExerciseId &&
++                        sibling.exerciseId == current.exerciseId &&
++                        sibling.setNumber > 1 &&
++                        !sibling.completed &&
++                        kotlin.math.abs(sibling.loadKg - current.loadKg) <= LOAD_EPSILON
++                }
++                .map { it.copy(loadKg = normalizedLoad) }
++            if (inherited.isNotEmpty()) dao.upsertSessionSets(inherited)
++        }
++
++        // Só uma série efetivamente concluída promove a carga para as fichas salvas. A comparação
++        // por exerciseId exato impede misturar variações e substituições feitas apenas nesta sessão.
++        if (toggleCompletion && completed && current.setNumber == 1 && normalizedLoad > 0.0) {
++            val session = dao.session(current.sessionId)
++            val planned = dao.workoutExercise(current.workoutExerciseId)
++            if (session?.isTestMode != true && planned?.exerciseId == current.exerciseId) {
++                syncExerciseLoadAcrossSavedWorkouts(current.exerciseId, normalizedLoad)
++            }
++        }
+     }
+ 
+     suspend fun substituteSessionExercise(
+@@ -561,6 +605,7 @@ class LiftlyRepository(
+                     )
+             )
+             val completedSets = sets.filter(SessionSetEntity::completed)
++            syncCompletedSessionLoads(completedSets)
+             val personalRecords = completedSets
+                 .groupBy(SessionSetEntity::exerciseId)
+                 .count { (exerciseId, exerciseSets) ->
+@@ -601,6 +646,36 @@ class LiftlyRepository(
+             dao.deleteHistoricalSessionsBetween(start, end)
+         }
+ 
++    private suspend fun syncCompletedSessionLoads(completedSets: List<SessionSetEntity>) {
++        completedSets
++            .filter { it.loadKg.isFinite() && it.loadKg > 0.0 }
++            .groupBy(SessionSetEntity::exerciseId)
++            .forEach { (exerciseId, exerciseSets) ->
++                val eligible = exerciseSets.filter { set ->
++                    dao.workoutExercise(set.workoutExerciseId)?.exerciseId == exerciseId
++                }
++                if (eligible.isEmpty()) return@forEach
++                // Prefer the first completed working set. This matches the default propagated load;
++                // if it is unavailable, use the most frequent load and break ties by the heaviest.
++                val firstLoad = eligible.minByOrNull(SessionSetEntity::setNumber)?.loadKg
++                val representative = firstLoad?.takeIf { it > 0.0 } ?: eligible
