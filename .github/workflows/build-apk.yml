@@ -28,8 +28,9 @@ jobs:
 
       - name: Apply Liftline identity 1.5.5
         run: |
-          base64 -d tools/apply_liftline_155.py.gz.b64 | gzip -d > /tmp/apply_liftline_155.py
-          python3 /tmp/apply_liftline_155.py
+          base64 -d tools/apply_liftline_155.py.gz.b64 | gzip -d > tools/apply_liftline_155.py
+          python3 tools/apply_liftline_155.py
+          rm tools/apply_liftline_155.py
 
       - name: Test and build debug APK
         run: |
