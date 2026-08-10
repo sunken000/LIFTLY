@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.2 — 2026-08-10
+
+- Botão Bi-set adicionado diretamente aos cards da área Treinos.
+- Pareamento em dois passos permite escolher quaisquer dois exercícios da ficha.
+- O segundo exercício é reposicionado ao lado do primeiro e o par fica identificado como A/B.
+- É possível desfazer o par pelo mesmo botão.
+- Pareamentos anteriores são normalizados antes de criar um novo par.
+- `versionName` 1.6.2 / `versionCode` 40.
+
 ## 1.6.1 — 2026-08-10
 
 - Restaurada a propagação da carga da primeira série para séries futuras ainda intactas.

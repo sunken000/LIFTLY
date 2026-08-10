@@ -3,6 +3,7 @@ package com.liftly.app.data
 import android.content.Context
 import androidx.room.withTransaction
 import com.liftly.app.domain.AdaptiveTrainingPlan
+import com.liftly.app.domain.BiSetPairing
 import com.liftly.app.domain.CurrentExerciseSetPerformance
 import com.liftly.app.domain.EffectiveScheduleResolver
 import com.liftly.app.domain.HistoricalExercisePerformance
@@ -403,6 +404,16 @@ class LiftlyRepository(
 
     suspend fun moveWorkoutExerciseBefore(workoutId: String, id: String, beforeId: String) = database.withTransaction {
         persistWorkoutExerciseOrder(WorkoutExerciseOrder.moveBefore(dao.workoutExercises(workoutId), id, beforeId))
+    }
+
+    suspend fun pairWorkoutExercisesAsBiSet(workoutId: String, firstId: String, secondId: String) = database.withTransaction {
+        val ordered = normalizedWorkoutExercises(workoutId)
+        persistWorkoutExerciseOrder(BiSetPairing.pair(ordered, firstId, secondId))
+    }
+
+    suspend fun unpairWorkoutBiSet(workoutId: String, itemId: String) = database.withTransaction {
+        val ordered = normalizedWorkoutExercises(workoutId)
+        persistWorkoutExerciseOrder(BiSetPairing.unpair(ordered, itemId))
     }
 
     suspend fun scheduleWorkout(date: LocalDate, workoutId: String) = database.withTransaction {
