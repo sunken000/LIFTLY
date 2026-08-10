@@ -31,6 +31,7 @@ jobs:
           cat tools/liftline_155.part* | base64 -d | gzip -d > tools/apply_liftline_155.py
           python3 tools/apply_liftline_155.py
           rm tools/apply_liftline_155.py
+          grep -qxF 'import androidx.compose.foundation.layout.height' app/src/main/java/com/liftly/app/ui/screens/WorkoutsScreen.kt || sed -i '/import androidx.compose.foundation.layout.fillMaxWidth/a import androidx.compose.foundation.layout.height' app/src/main/java/com/liftly/app/ui/screens/WorkoutsScreen.kt
 
       - name: Test and build debug APK
         run: |
