@@ -1,0 +1,108 @@
++                                        val secondId = if (group.position == 1) group.partnerWorkoutExerciseId else item.id
++                                        vm.setSupersetPair(workout.id, firstId, secondId, false)
++                                    }
++                                },
+                                 onEdit = {
+                                     openSubstitutionsOnConfigure = false
+                                     configuringItem = item
+@@ -801,10 +822,15 @@ private fun WorkoutExerciseCard(
+     number: Int,
+     item: WorkoutExerciseEntity,
+     exercise: ExerciseEntity?,
++    supersetMembership: SupersetMembership?,
++    supersetPartnerName: String?,
++    canPairWithNext: Boolean,
+     canMoveUp: Boolean,
+     canMoveDown: Boolean,
+     onMoveUp: () -> Unit,
+     onMoveDown: () -> Unit,
++    onPairWithNext: () -> Unit,
++    onRemovePair: () -> Unit,
+     onEdit: () -> Unit,
+     onSubstitute: () -> Unit,
+     onRemove: () -> Unit,
+@@ -839,6 +865,39 @@ private fun WorkoutExerciseCard(
+                     Text(item.setType, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                     exercise?.let { Text(it.muscleGroup, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                 }
++                if (supersetMembership != null) {
++                    Text(
++                        "BI-SET ${if (supersetMembership.position == 1) "A" else "B"} • ${supersetPartnerName ?: "exercício parceiro"}",
++                        style = MaterialTheme.typography.labelMedium,
++                        color = MaterialTheme.colorScheme.secondary,
++                        fontWeight = FontWeight.Bold,
++                    )
++                    Text(
++                        if (supersetMembership.position == 1) "Execute este exercício e siga direto para o parceiro, sem descanso."
++                        else "O descanso do grupo começa depois deste exercício.",
++                        style = MaterialTheme.typography.bodySmall,
++                        color = MaterialTheme.colorScheme.onSurfaceVariant,
++                    )
++                    TextButton(
++                        onClick = onRemovePair,
++                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
++                    ) { Text("Desfazer bi-set") }
++                } else if (canPairWithNext) {
++                    TextButton(
++                        onClick = onPairWithNext,
++                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
++                    ) {
++                        Icon(Icons.Outlined.SwapHoriz, contentDescription = null, modifier = Modifier.size(18.dp))
++                        Spacer(Modifier.width(5.dp))
++                        Text("Bi-set com o próximo")
++                    }
++                } else if (SupersetPlanner.isMarked(item)) {
++                    Text(
++                        "Supersérie sem par. Agrupe este exercício com outro adjacente.",
++                        style = MaterialTheme.typography.bodySmall,
++                        color = MaterialTheme.colorScheme.error,
++                    )
++                }
+                 TextButton(
+                     onClick = onSubstitute,
+                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+diff --git a/app/src/main/java/com/liftly/app/ui/screens/TodayScreen.kt b/app/src/main/java/com/liftly/app/ui/screens/TodayScreen.kt
+index 0ccc6f5..fd4404a 100644
+--- a/app/src/main/java/com/liftly/app/ui/screens/TodayScreen.kt
++++ b/app/src/main/java/com/liftly/app/ui/screens/TodayScreen.kt
+@@ -105,6 +105,7 @@ import com.liftly.app.domain.ProgressionCoach
+ import com.liftly.app.domain.ProgressionCoachInput
+ import com.liftly.app.domain.ProgressionRecommendation
+ import com.liftly.app.domain.ProgressionStatus
++import com.liftly.app.domain.SupersetPlanner
+ import com.liftly.app.domain.PROGRESSION_COACH_DISCLAIMER
+ import com.liftly.app.service.WorkoutTrackingService
+ import com.liftly.app.ui.AppViewModel
+@@ -429,6 +430,10 @@ fun SessionScreen(
+     val sessionWorkoutItems = remember(session?.workoutId, workoutItems) {
+         workoutItems.filter { it.workoutId == session?.workoutId }.sortedBy { it.orderIndex }
+     }
++    val supersetMemberships = remember(sessionWorkoutItems) { SupersetPlanner.memberships(sessionWorkoutItems) }
++    val executionSequence = remember(sets, sessionWorkoutItems) {
++        SupersetPlanner.sequence(sets, sessionWorkoutItems)
++    }
+     val automaticWarmupPlan = remember(
+         showAutomaticWarmup,
+         session?.workoutId,
+@@ -614,7 +619,7 @@ fun SessionScreen(
+         if (warmupTimerStepId == stepId && warmupTimerEndsAt == targetEnd) finishWarmupTimer()
+     }
+ 
+-    val nextWorkSet = sets.firstOrNull { !it.completed }
++    val nextWorkSet = executionSequence.firstOrNull { !it.completed }
+     val nextWarmupStep = if (showAutomaticWarmup) {
+         generalWarmupSteps.firstOrNull { it.id !in warmupCompletedIds }
+             ?: nextWorkSet?.workoutExerciseId?.let { workoutExerciseId ->
+@@ -734,6 +739,29 @@ fun SessionScreen(
+                     LinearProgressIndicator({ progress }, Modifier.fillMaxWidth().height(8.dp).clip(CircleShape))
+                 }
+             }
++            nextWorkSet?.let { nextSet ->
++                item(key = "next-work-set") {
++                    val membership = supersetMemberships[nextSet.workoutExerciseId]
++                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
++                        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
++                            Text("Próxima ação", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
++                            Text(
++                                "${nextSet.exerciseName} • série ${nextSet.setNumber}",
++                                fontWeight = FontWeight.Bold,
