@@ -1,5 +1,4 @@
 package com.liftly.app.ui
-
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
@@ -31,7 +30,6 @@ import com.liftly.app.integration.discord.DiscordWorkoutExport
 import com.liftly.app.integration.healthconnect.AndroidHealthConnectRepository
 import com.liftly.app.integration.healthconnect.WorkoutHealthExportMapper
 import com.liftly.app.integration.healthconnect.WorkoutHealthExportPreparation
-import com.liftly.app.domain.WorkoutRewardMetrics
 import com.liftly.app.domain.ParsedWorkout
 import com.liftly.app.widget.TodayWorkoutWidgetUpdater
 import com.liftly.app.ui.theme.PaletteColorCodec
@@ -71,7 +69,6 @@ class AppViewModel(
     val bodyPhotos = repository.bodyPhotos.stateIn(viewModelScope, started, emptyList())
     val profile = repository.profile.stateIn(viewModelScope, started, null)
     val rewards = repository.rewards.stateIn(viewModelScope, started, RewardSnapshot())
-
     private val _ready = MutableStateFlow(false)
     val ready: StateFlow<Boolean> = _ready
     private val _initializationError = MutableStateFlow<String?>(null)
@@ -142,7 +139,6 @@ class AppViewModel(
         preferencesRepository.finishOnboarding(useDemo)
         updateTodayWidget()
     }
-
     fun setTheme(value: String) = act { preferencesRepository.setTheme(value) }
     fun setHaptics(value: Boolean) = act { preferencesRepository.setHaptics(value) }
     fun setRestTimer(value: Boolean) = act { preferencesRepository.setRestTimer(value) }
@@ -239,7 +235,6 @@ class AppViewModel(
         preferencesRepository.setDiscordWebhookUrl(value)
         if (value.isBlank()) preferencesRepository.setDiscordWebhookEnabled(false)
     }
-
     fun testDiscordWebhook(value: String) {
         viewModelScope.launch {
             val url = value.trim()
@@ -255,7 +250,6 @@ class AppViewModel(
             }
         }
     }
-
     fun saveWorkout(name: String, description: String, days: Set<DayOfWeek>, existing: WorkoutEntity? = null) =
         act("Treino salvo.") {
             require(name.isNotBlank()) { "Dê um nome ao treino." }
@@ -263,30 +257,24 @@ class AppViewModel(
             else repository.saveWorkout(existing.copy(name = name.trim(), description = description.trim(), weekDays = days.joinToString(",") { it.value.toString() }))
             updateTodayWidget()
         }
-
     fun duplicateWorkout(workout: WorkoutEntity) = act("Treino duplicado.") { repository.duplicateWorkout(workout); updateTodayWidget() }
     fun archiveWorkout(id: String) = act("Treino arquivado.") { repository.archiveWorkout(id); updateTodayWidget() }
     fun deleteWorkout(id: String) = act("Treino excluído.") { repository.deleteWorkout(id); updateTodayWidget() }
-
     fun addExercise(workoutId: String, exerciseId: String, sets: Int, repMin: Int, repMax: Int, load: Double, rest: Int, type: String, notes: String, exerciseName: String? = null) =
         act("Exercício adicionado.") { repository.addExerciseToWorkout(workoutId, exerciseId, sets, repMin, repMax, load, rest, type, notes, exerciseName); updateTodayWidget() }
-
     fun updateWorkoutExercise(item: WorkoutExerciseEntity, exerciseName: String? = null) = act("Configuração salva.") { repository.updateWorkoutExercise(item, exerciseName); updateTodayWidget() }
     fun removeWorkoutExercise(id: String) = act("Exercício removido.") { repository.removeWorkoutExercise(id); updateTodayWidget() }
     fun moveWorkoutExercise(workoutId: String, id: String, direction: Int) = act { repository.moveWorkoutExercise(workoutId, id, direction); updateTodayWidget() }
     fun moveWorkoutExerciseBefore(workoutId: String, id: String, beforeId: String) = act { repository.moveWorkoutExerciseBefore(workoutId, id, beforeId); updateTodayWidget() }
-
     fun saveCustomExercise(exercise: ExerciseEntity) = act("Exercício personalizado salvo.") { repository.saveExercise(exercise) }
     fun renameExercise(id: String, name: String) = act("Nome do exercício atualizado.") { repository.renameExercise(id, name) }
     fun toggleFavorite(exercise: ExerciseEntity) = act { repository.toggleFavorite(exercise) }
     fun deleteCustomExercise(exercise: ExerciseEntity) = act("Exercício removido.") { repository.deleteCustomExercise(exercise) }
-
     fun scheduleWorkout(date: LocalDate, workoutId: String) = act("Programação atualizada.") { repository.scheduleWorkout(date, workoutId); updateTodayWidget() }
     fun setRestDay(date: LocalDate) = act("Dia de descanso definido.") { repository.setRestDay(date); updateTodayWidget() }
     fun removeSchedule(id: String) = act { repository.removeSchedule(id); updateTodayWidget() }
     fun setScheduleStatus(item: ScheduleEntity, status: String) = act("Status atualizado.") { repository.setScheduleStatus(item, status); updateTodayWidget() }
     fun copyWeek(source: LocalDate, target: LocalDate) = act("Semana copiada.") { repository.copyWeek(source, target); updateTodayWidget() }
-
     fun startSession(
         workoutId: String,
         isTestMode: Boolean = false,
@@ -314,10 +302,8 @@ class AppViewModel(
             }
         }
     }
-
     fun startTestSession(workoutId: String, onStarted: (String) -> Unit) =
         startSession(workoutId, isTestMode = true, onStarted = onStarted)
-
     fun saveSet(
         item: SessionSetEntity,
         reps: Int,
@@ -344,7 +330,6 @@ class AppViewModel(
             _feedback.value = ActionFeedback("Não foi possível enfileirar a alteração da série.", true)
         }
     }
-
     fun substituteSessionExercise(
         sessionId: String,
         workoutExerciseId: String,
@@ -357,7 +342,6 @@ class AppViewModel(
             replacementExerciseId = replacementExerciseId,
         )
     }
-
     fun finishSession(sessionId: String, onFinished: () -> Unit) = act {
         val sessionBeforeFinish = sessions.value.firstOrNull { it.id == sessionId }
         // A completion tap can happen immediately after the final load/RIR edit. The barrier
@@ -407,10 +391,8 @@ class AppViewModel(
         }
         onFinished()
     }
-
     fun deleteHistoricalSession(sessionId: String) =
         act("Treino removido do histórico.") { repository.deleteHistoricalSession(sessionId) }
-
     fun deleteHistoryForDate(date: LocalDate) = act {
         val removed = repository.deleteHistoryForDate(date)
         _feedback.value = ActionFeedback(
@@ -421,7 +403,6 @@ class AppViewModel(
     }
 
     fun saveWeight(value: Double, notes: String = "") = act("Peso registrado.") { repository.saveWeight(value, notes) }
-
     fun purchaseRewardItem(itemId: String) = act("Item adquirido e adicionado à sua coleção.") {
         repository.purchaseRewardItem(itemId)
     }
@@ -434,34 +415,6 @@ class AppViewModel(
         repository.unequipRewardSlot(slot)
     }
 
-    fun adminGrantRewards(xp: Long, coins: Long) = act("Saldo de teste atualizado.") {
-        repository.adminGrantRewards(xp, coins)
-    }
-
-    fun adminUnlockAllRewards() = act("Catálogo liberado para teste.") {
-        repository.adminUnlockAllRewards()
-    }
-
-    fun adminSimulateRewardWorkout(mode: String) = act("Treino simulado e recompensas processadas.") {
-        val metrics = when (mode.uppercase()) {
-            "PR" -> WorkoutRewardMetrics(4, 4, 4, personalRecords = 1)
-            "COMPLETE" -> WorkoutRewardMetrics(4, 4, 4)
-            else -> WorkoutRewardMetrics(3, 5, 2)
-        }
-        repository.adminSimulateWorkout(metrics)
-    }
-
-    fun adminCompleteRewardMission(missionId: String) = act("Missão concluída no modo administrador.") {
-        repository.adminCompleteRewardMission(missionId)
-    }
-
-    fun adminResetCurrentRewardMissions() = act("Missões atuais reiniciadas para teste.") {
-        repository.adminResetCurrentRewardMissions()
-    }
-
-    fun adminResetRewardEconomy() = act("Economia de recompensas reiniciada.") {
-        repository.adminResetRewardEconomy()
-    }
     fun updateWeight(entry: BodyWeightEntryEntity, value: Double, notes: String = "") =
         act("Peso atualizado.") { repository.updateWeight(entry.id, value, notes) }
     fun deleteWeight(id: String) = act { repository.deleteWeight(id) }
@@ -476,10 +429,8 @@ class AppViewModel(
         if (!stillUsed) releasePhotoPermission(photo.imageUri)
     }
     fun saveProfile(value: UserProfileEntity) = act("Perfil salvo.") { repository.saveProfile(value) }
-
     suspend fun createWorkoutExport(workoutId: String): Result<String> =
         runCatching { repository.exportWorkout(workoutId) }
-
     fun importWorkoutExport(payload: String, onImported: (String) -> Unit = {}) {
         viewModelScope.launch {
             runCatching { repository.importWorkout(payload) }
@@ -496,7 +447,6 @@ class AppViewModel(
                 }
         }
     }
-
     fun importWorkoutText(workouts: List<ParsedWorkout>, onImported: (String) -> Unit = {}) {
         viewModelScope.launch {
             runCatching { repository.importTextWorkouts(workouts) }
@@ -516,7 +466,6 @@ class AppViewModel(
                 }
         }
     }
-
     suspend fun createBackup(): Result<String> = runCatching { repository.backupJson() }
     fun importBackup(json: String) = act("Backup importado com sucesso.") {
         val previousPhotoUris = repository.allBodyPhotos().map { it.imageUri }
@@ -550,7 +499,6 @@ class AppViewModel(
         clearAllSessionRuntimeState()
         WorkoutTrackingService.stop(getApplication<Application>())
     }
-
     fun updateSessionWarmupState(
         sessionId: String,
         transform: (SessionWarmupRuntimeState) -> SessionWarmupRuntimeState,
@@ -564,7 +512,6 @@ class AppViewModel(
         _automaticWarmupSessions.value = _automaticWarmupSessions.value - sessionId
         _sessionWarmupStates.update { it - sessionId }
     }
-
     private fun clearAllSessionRuntimeState() {
         _automaticWarmupSessions.value = emptySet()
         _sessionWarmupStates.value = emptyMap()
@@ -574,7 +521,6 @@ class AppViewModel(
     fun reportFeedback(message: String, isError: Boolean = false) {
         _feedback.value = ActionFeedback(message, isError)
     }
-
     fun workout(id: String): WorkoutEntity? = workouts.value.firstOrNull { it.id == id }
     fun exercise(id: String): ExerciseEntity? = exercises.value.firstOrNull { it.id == id }
     fun itemsForWorkout(id: String): List<WorkoutExerciseEntity> = workoutExercises.value.filter { it.workoutId == id }.sortedBy { it.orderIndex }
@@ -583,7 +529,6 @@ class AppViewModel(
         .sortedWith(compareBy<SessionSetEntity> { it.exerciseOrder }.thenBy { it.setNumber })
     fun activeSession(): SessionEntity? = sessions.value.firstOrNull { it.status == "Em andamento" }
     fun schedulesFor(date: LocalDate): List<ScheduleEntity> = schedule.value.filter { it.date == date.toString() }
-
     private fun releasePhotoPermission(rawUri: String) {
         runCatching {
             getApplication<Application>().contentResolver.releasePersistableUriPermission(
@@ -596,7 +541,6 @@ class AppViewModel(
     private fun updateTodayWidget() {
         TodayWorkoutWidgetUpdater.requestUpdate(getApplication<Application>())
     }
-
     private fun act(success: String? = null, block: suspend () -> Unit) {
         viewModelScope.launch {
             runCatching { block() }
@@ -609,7 +553,6 @@ class AppViewModel(
         setUpdateQueue.close()
         super.onCleared()
     }
-
     private data class SetUpdateCommand(
         val item: SessionSetEntity,
         val reps: Int,
@@ -619,7 +562,6 @@ class AppViewModel(
         val painLevel: Int,
         val successMessage: String?,
     )
-
     companion object {
         fun factory(app: LiftlyApplication): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
