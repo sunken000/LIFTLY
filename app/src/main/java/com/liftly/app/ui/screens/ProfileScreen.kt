@@ -36,7 +36,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.BusinessCenter
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.AddAPhoto
@@ -57,7 +56,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -116,7 +114,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.liftly.app.BuildConfig
 import com.liftly.app.data.ExerciseEntity
 import com.liftly.app.data.BodyPhotoEntity
 import com.liftly.app.data.SessionEntity
@@ -162,9 +159,7 @@ import kotlin.math.roundToInt
 @Composable
 fun ProfileScreen(
     vm: AppViewModel,
-    onOpenBusiness: () -> Unit = {},
     onOpenRewards: () -> Unit = {},
-    onOpenRewardsAdmin: () -> Unit = {},
 ) {
     val profile by vm.profile.collectAsStateWithLifecycle()
     val weights by vm.weights.collectAsStateWithLifecycle()
@@ -428,26 +423,6 @@ fun ProfileScreen(
                     "Nível ${rewards.level.level} • ${rewards.wallet.coinBalance} Lift Coins",
                     onClick = onOpenRewards,
                 )
-            }
-            if (BuildConfig.ADMIN_TOOLS) {
-                item {
-                    MenuCard(
-                        Icons.Default.AdminPanelSettings,
-                        "Laboratório Rewards",
-                        "Simule treinos, missões, saldo e a experiência do usuário",
-                        onClick = onOpenRewardsAdmin,
-                    )
-                }
-            }
-            if (BuildConfig.COMMERCIAL_EDITION) {
-                item {
-                    MenuCard(
-                        Icons.Default.BusinessCenter,
-                        "Painel Business",
-                        "Planos, licenças e preparação da academia",
-                        onClick = onOpenBusiness,
-                    )
-                }
             }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
