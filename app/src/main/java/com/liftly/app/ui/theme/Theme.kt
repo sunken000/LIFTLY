@@ -17,38 +17,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-val LiftlyPurple = Color(0xFFB779E8)
-val LiftlyPurpleBright = Color(0xFFD8B7F4)
-val LiftlyPurpleDark = Color(0xFF68458A)
-val LiftlyInk = Color(0xFF0C0910)
-val LiftlySlate = Color(0xFF18131C)
+// 1.5.4: violeta mais sóbrio e menos saturado. O roxo continua sendo a assinatura do Liftly,
+// mas deixa de competir com conteúdo, métricas e estados funcionais.
+val LiftlyPurple = Color(0xFF8E72B5)
+val LiftlyPurpleBright = Color(0xFFB8A7D6)
+val LiftlyPurpleDark = Color(0xFF5D4A78)
+val LiftlyInk = Color(0xFF0E0D10)
+val LiftlySlate = Color(0xFF17161A)
 
-// Kept as aliases so older UI code or previews importing the former brand names still compile.
+// Aliases preservados para compatibilidade com código e previews antigos.
 val LiftlyTeal = LiftlyPurple
 val LiftlyTealBright = LiftlyPurpleBright
 val LiftlyTealDark = LiftlyPurpleDark
 
 private val PurpleNeonColors = darkColorScheme(
     primary = LiftlyPurpleBright,
-    onPrimary = Color(0xFF2D153A),
-    primaryContainer = Color(0xFF332440),
-    onPrimaryContainer = Color(0xFFF1E3FC),
-    secondary = Color(0xFFC7BCCB),
-    onSecondary = Color(0xFF2E2931),
-    secondaryContainer = Color(0xFF302B33),
-    onSecondaryContainer = Color(0xFFEAE3ED),
-    tertiary = Color(0xFFD1ACC2),
-    onTertiary = Color(0xFF392532),
-    tertiaryContainer = Color(0xFF3C2B36),
-    onTertiaryContainer = Color(0xFFF2E0EA),
+    onPrimary = Color(0xFF251F2C),
+    primaryContainer = Color(0xFF2B2532),
+    onPrimaryContainer = Color(0xFFE9E2F1),
+    secondary = Color(0xFFAEA5B5),
+    onSecondary = Color(0xFF29262D),
+    secondaryContainer = Color(0xFF2D2931),
+    onSecondaryContainer = Color(0xFFE8E3EA),
+    tertiary = Color(0xFFA997B8),
+    onTertiary = Color(0xFF2C2630),
+    tertiaryContainer = Color(0xFF332C37),
+    onTertiaryContainer = Color(0xFFEBE3ED),
     background = LiftlyInk,
-    onBackground = Color(0xFFF8F2FA),
+    onBackground = Color(0xFFF1EFF3),
     surface = LiftlySlate,
-    onSurface = Color(0xFFF8F2FA),
-    surfaceVariant = Color(0xFF262129),
-    onSurfaceVariant = Color(0xFFCEC5D1),
-    outline = Color(0xFF8D838F),
-    outlineVariant = Color(0xFF403943),
+    onSurface = Color(0xFFF1EFF3),
+    surfaceVariant = Color(0xFF222126),
+    onSurfaceVariant = Color(0xFFC7C1CB),
+    outline = Color(0xFF7B7580),
+    outlineVariant = Color(0xFF39353D),
     error = Color(0xFFFFB4AB),
     onError = Color(0xFF690005),
     errorContainer = Color(0xFF93000A),
@@ -57,26 +59,26 @@ private val PurpleNeonColors = darkColorScheme(
 )
 
 private val WhiteColors = lightColorScheme(
-    primary = Color(0xFF71319D),
+    primary = Color(0xFF67507E),
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFF0D9FF),
-    onPrimaryContainer = Color(0xFF2D0048),
-    secondary = Color(0xFF65566D),
+    primaryContainer = Color(0xFFE9E1EE),
+    onPrimaryContainer = Color(0xFF271F2D),
+    secondary = Color(0xFF726A77),
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFEDDEF2),
-    onSecondaryContainer = Color(0xFF211829),
-    tertiary = Color(0xFF87506E),
+    secondaryContainer = Color(0xFFECE8EE),
+    onSecondaryContainer = Color(0xFF27232A),
+    tertiary = Color(0xFF7C687A),
     onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFFFD8E8),
-    onTertiaryContainer = Color(0xFF381126),
-    background = Color(0xFFFAF7FC),
-    onBackground = Color(0xFF211D23),
-    surface = Color(0xFAFFFFFF),
-    onSurface = Color(0xFF211D23),
-    surfaceVariant = Color(0xFFEFE8F1),
-    onSurfaceVariant = Color(0xFF514A54),
-    outline = Color(0xFF7D747F),
-    outlineVariant = Color(0xFFCFC4D1),
+    tertiaryContainer = Color(0xFFF0E6ED),
+    onTertiaryContainer = Color(0xFF2B222A),
+    background = Color(0xFFF8F8FA),
+    onBackground = Color(0xFF1D1C20),
+    surface = Color.White,
+    onSurface = Color(0xFF1D1C20),
+    surfaceVariant = Color(0xFFEEEEF1),
+    onSurfaceVariant = Color(0xFF535057),
+    outline = Color(0xFF7D7881),
+    outlineVariant = Color(0xFFD0CDD4),
     error = Color(0xFFBA1A1A),
     onError = Color.White,
     errorContainer = Color(0xFFFFDAD6),
@@ -85,26 +87,26 @@ private val WhiteColors = lightColorScheme(
 )
 
 private val BlackColors = darkColorScheme(
-    primary = Color(0xFFD88AFF),
-    onPrimary = Color(0xFF3D0055),
-    primaryContainer = Color(0xFF591D75),
-    onPrimaryContainer = Color(0xFFF1D5FF),
-    secondary = Color(0xFFD0C7D4),
-    onSecondary = Color(0xFF302E32),
-    secondaryContainer = Color(0xFF454347),
-    onSecondaryContainer = Color(0xFFECE7EF),
-    tertiary = Color(0xFFD0CDD1),
-    onTertiary = Color(0xFF302D31),
-    tertiaryContainer = Color(0xFF474448),
-    onTertiaryContainer = Color(0xFFECE8EC),
+    primary = Color(0xFFB8A7D6),
+    onPrimary = Color(0xFF251F2C),
+    primaryContainer = Color(0xFF2A2430),
+    onPrimaryContainer = Color(0xFFE9E2F1),
+    secondary = Color(0xFFAAA3AD),
+    onSecondary = Color(0xFF28262A),
+    secondaryContainer = Color(0xFF272629),
+    onSecondaryContainer = Color(0xFFE9E6EA),
+    tertiary = Color(0xFFA89EAA),
+    onTertiary = Color(0xFF292629),
+    tertiaryContainer = Color(0xFF2B292D),
+    onTertiaryContainer = Color(0xFFEBE8EC),
     background = Color.Black,
-    onBackground = Color(0xFFF5F5F7),
-    surface = Color(0xFF101012),
-    onSurface = Color(0xFFF5F5F7),
-    surfaceVariant = Color(0xFF242426),
-    onSurfaceVariant = Color(0xFFD1CDD3),
-    outline = Color(0xFF969297),
-    outlineVariant = Color(0xFF464347),
+    onBackground = Color(0xFFF3F2F5),
+    surface = Color(0xFF0D0D0F),
+    onSurface = Color(0xFFF3F2F5),
+    surfaceVariant = Color(0xFF1B1B1E),
+    onSurfaceVariant = Color(0xFFC8C5CB),
+    outline = Color(0xFF87848A),
+    outlineVariant = Color(0xFF333236),
     error = Color(0xFFFFB4AB),
     onError = Color(0xFF690005),
     errorContainer = Color(0xFF93000A),
@@ -138,11 +140,11 @@ private val PurpleNeonExtendedColors = LiftlyExtendedColors(
     onWarning = Color(0xFF422C00),
     warningContainer = Color(0xFF5E4200),
     onWarningContainer = Color(0xFFFFDF99),
-    chartGrid = Color(0xFF4A3A52),
-    glow = LiftlyPurple.copy(alpha = 0.30f),
-    ambientPrimary = Color(0xFF9A55C8),
-    ambientSecondary = Color(0xFFB56B9B),
-    glassSurface = Color(0xF21A151E),
+    chartGrid = Color(0xFF3A3740),
+    glow = LiftlyPurple.copy(alpha = 0.14f),
+    ambientPrimary = Color(0xFF6E5A88),
+    ambientSecondary = Color(0xFF7A6677),
+    glassSurface = Color(0xFA19181C),
 )
 
 private val WhiteExtendedColors = LiftlyExtendedColors(
@@ -154,11 +156,11 @@ private val WhiteExtendedColors = LiftlyExtendedColors(
     onWarning = Color.White,
     warningContainer = Color(0xFFFFDEA1),
     onWarningContainer = Color(0xFF261900),
-    chartGrid = Color(0xFFDED5E1),
-    glow = LiftlyPurple.copy(alpha = 0.14f),
-    ambientPrimary = Color(0xFFE3C7F4),
-    ambientSecondary = Color(0xFFF4D7E8),
-    glassSurface = Color(0xE6FFFFFF),
+    chartGrid = Color(0xFFDCDCE1),
+    glow = LiftlyPurple.copy(alpha = 0.08f),
+    ambientPrimary = Color(0xFFE6E0EC),
+    ambientSecondary = Color(0xFFEBE5E9),
+    glassSurface = Color(0xFCFFFFFF),
 )
 
 private val BlackExtendedColors = LiftlyExtendedColors(
@@ -170,11 +172,11 @@ private val BlackExtendedColors = LiftlyExtendedColors(
     onWarning = Color(0xFF422C00),
     warningContainer = Color(0xFF5E4200),
     onWarningContainer = Color(0xFFFFDF99),
-    chartGrid = Color(0xFF303033),
+    chartGrid = Color(0xFF2C2C30),
     glow = Color.Transparent,
     ambientPrimary = Color.Transparent,
     ambientSecondary = Color.Transparent,
-    glassSurface = Color(0xF21A1A1D),
+    glassSurface = Color(0xFC111113),
 )
 
 private val LocalLiftlyExtendedColors = staticCompositionLocalOf { PurpleNeonExtendedColors }
