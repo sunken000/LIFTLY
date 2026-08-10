@@ -10,7 +10,6 @@ fun RewardSnapshot.toUiState(
     workoutStreak: Int,
     selectedCategory: RewardCategory,
     selectedMissionPeriod: MissionPeriod,
-    viewerMode: RewardsViewerMode,
 ): RewardsUiState = RewardsUiState(
     account = RewardsAccountUi(
         level = level.level,
@@ -30,7 +29,6 @@ fun RewardSnapshot.toUiState(
                 "WORKOUT" -> "Treino concluído"
                 "MISSION" -> "Missão concluída"
                 "PURCHASE" -> "Compra na loja"
-                "ADMIN" -> "Ajuste de teste"
                 else -> "Movimentação"
             },
             xp = entry.deltaXp.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt(),
@@ -40,7 +38,6 @@ fun RewardSnapshot.toUiState(
     },
     selectedCategory = selectedCategory,
     selectedMissionPeriod = selectedMissionPeriod,
-    viewerMode = viewerMode,
 )
 
 private fun RewardStoreItem.toUi(currentLevel: Int): RewardItemUi {
