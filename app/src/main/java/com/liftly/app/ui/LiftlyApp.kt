@@ -1,15 +1,15 @@
 package com.liftly.app.ui
 
 import android.app.Activity
-
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -19,19 +19,18 @@ import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -43,16 +42,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -60,55 +59,47 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.liftly.app.ui.screens.CalendarScreen
-import com.liftly.app.ui.screens.AdminMissionSimulation
-import com.liftly.app.ui.screens.AdminRewardsScreen
-import com.liftly.app.ui.screens.AdminRewardsUiState
-import com.liftly.app.ui.screens.AdminWorkoutSimulation
-import com.liftly.app.ui.screens.BusinessScreen
-import com.liftly.app.ui.screens.ExercisesScreen
-import com.liftly.app.ui.screens.OnboardingScreen
-import com.liftly.app.ui.screens.MusicScreen
-import com.liftly.app.ui.screens.MusicScreenState
-import com.liftly.app.ui.screens.ProfileScreen
-import com.liftly.app.ui.screens.ProgressScreen
-import com.liftly.app.ui.screens.SessionScreen
-import com.liftly.app.ui.screens.StopwatchScreen
-import com.liftly.app.ui.screens.TodayScreen
-import com.liftly.app.ui.screens.WorkoutsScreen
-import com.liftly.app.ui.components.LiftlyBackground
-import com.liftly.app.ui.components.NeonIcon
-import com.liftly.app.ui.theme.LiftlyTheme
-import com.liftly.app.ui.theme.LiftlyCustomPalette
-import com.liftly.app.ui.theme.isLiftlyBackgroundLight
-import com.liftly.app.ui.rewards.MissionPeriod
-import com.liftly.app.ui.rewards.RewardCategory
-import com.liftly.app.ui.rewards.RewardCosmetics
-import com.liftly.app.ui.rewards.RewardsActions
-import com.liftly.app.ui.rewards.RewardsScreen
-import com.liftly.app.ui.rewards.RewardsViewerMode
-import com.liftly.app.ui.rewards.toUiState
-import com.liftly.app.BuildConfig
 import com.liftly.app.LiftlyApplication
 import com.liftly.app.data.RewardSlots
 import com.liftly.app.domain.TrainingMomentumCalculator
 import com.liftly.app.integration.spotify.MusicConfigSource
 import com.liftly.app.integration.spotify.MusicRefreshIssue
 import com.liftly.app.integration.spotify.MusicState
-import com.liftly.app.integration.spotify.SpotifyLauncher
 import com.liftly.app.integration.spotify.PersonalSpotifyPlaylist
+import com.liftly.app.integration.spotify.SpotifyLauncher
 import com.liftly.app.integration.spotify.SpotifyPlaylistLinks
-import com.liftly.app.commercial.billing.GooglePlayCommercialBillingGateway
-import android.widget.Toast
+import com.liftly.app.ui.components.LiftlyBackground
+import com.liftly.app.ui.components.NeonIcon
+import com.liftly.app.ui.rewards.MissionPeriod
+import com.liftly.app.ui.rewards.RewardCategory
+import com.liftly.app.ui.rewards.RewardCosmetics
+import com.liftly.app.ui.rewards.RewardsActions
+import com.liftly.app.ui.rewards.RewardsScreen
+import com.liftly.app.ui.rewards.toUiState
+import com.liftly.app.ui.screens.CalendarScreen
+import com.liftly.app.ui.screens.ExercisesScreen
+import com.liftly.app.ui.screens.MusicScreen
+import com.liftly.app.ui.screens.MusicScreenState
+import com.liftly.app.ui.screens.OnboardingScreen
+import com.liftly.app.ui.screens.ProfileScreen
+import com.liftly.app.ui.screens.ProgressScreen
+import com.liftly.app.ui.screens.SessionScreen
+import com.liftly.app.ui.screens.StopwatchScreen
+import com.liftly.app.ui.screens.TodayScreen
+import com.liftly.app.ui.screens.WorkoutsScreen
+import com.liftly.app.ui.theme.LiftlyCustomPalette
+import com.liftly.app.ui.theme.LiftlyTheme
+import com.liftly.app.ui.theme.isLiftlyBackgroundLight
 import java.time.OffsetDateTime
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
 
-private data class MainDestination(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+private data class MainDestination(
+    val route: String,
+    val label: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+)
 
 private val mainDestinations = listOf(
     MainDestination("today", "Hoje", Icons.Default.Home),
@@ -117,7 +108,7 @@ private val mainDestinations = listOf(
     MainDestination("progress", "Progresso", Icons.Default.Insights),
     MainDestination("stopwatch", "Cronômetro", Icons.Default.Timer),
     MainDestination("music", "Música", Icons.Default.LibraryMusic),
-    MainDestination("profile", "Perfil", Icons.Default.Person)
+    MainDestination("profile", "Perfil", Icons.Default.Person),
 )
 
 @Composable
@@ -173,10 +164,16 @@ fun LiftlyApp(vm: AppViewModel) {
         ) {
             if (!ready) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    if (initializationError == null) CircularProgressIndicator()
-                    else Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(initializationError ?: "Falha ao abrir o banco local.")
-                        Button(onClick = vm::retryInitialization) { Text("Tentar novamente") }
+                    if (initializationError == null) {
+                        CircularProgressIndicator()
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Text(initializationError ?: "Falha ao abrir o banco local.")
+                            Button(onClick = vm::retryInitialization) { Text("Tentar novamente") }
+                        }
                     }
                 }
             } else {
@@ -211,7 +208,11 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
 
     LaunchedEffect(feedback?.nonce) {
         feedback?.let {
-            if (prefs.haptics) haptic.performHapticFeedback(if (it.isError) HapticFeedbackType.LongPress else HapticFeedbackType.Confirm)
+            if (prefs.haptics) {
+                haptic.performHapticFeedback(
+                    if (it.isError) HapticFeedbackType.LongPress else HapticFeedbackType.Confirm,
+                )
+            }
             snackbar.showSnackbar(it.message)
             vm.clearFeedback()
         }
@@ -260,7 +261,9 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                                     alwaysShowLabel = false,
                                     onClick = {
                                         navController.navigate(destination.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -268,7 +271,6 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                                     icon = {
                                         NeonIcon(
                                             imageVector = destination.icon,
-                                            // NavigationBarItem already exposes the visible label to TalkBack.
                                             contentDescription = destination.label,
                                             selected = selected,
                                             intensity = if (selected) 0.55f else 0f,
@@ -300,32 +302,32 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                     }
                 }
             }
-        }
+        },
     ) { outerPadding ->
         NavHost(
             navController = navController,
             startDestination = if (onboardingDone) "today" else "onboarding",
-            modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding())
+            modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
         ) {
             composable("onboarding") {
                 OnboardingScreen { demo ->
                     vm.finishOnboarding(demo)
-                    navController.navigate("today") { popUpTo("onboarding") { inclusive = true } }
+                    navController.navigate("today") {
+                        popUpTo("onboarding") { inclusive = true }
+                    }
                 }
             }
             composable("today") {
                 TodayScreen(
                     vm = vm,
-                    onOpenSession = { id ->
-                        openSession(id, automaticWarmup = false)
-                    },
-                    onOpenWarmupSession = { id ->
-                        openSession(id, automaticWarmup = true)
-                    },
+                    onOpenSession = { id -> openSession(id, automaticWarmup = false) },
+                    onOpenWarmupSession = { id -> openSession(id, automaticWarmup = true) },
                     onOpenCalendar = { navController.navigate("calendar") },
                 )
             }
-            composable("workouts") { WorkoutsScreen(vm) { navController.navigate("calendar") } }
+            composable("workouts") {
+                WorkoutsScreen(vm) { navController.navigate("calendar") }
+            }
             composable("exercises") { ExercisesScreen(vm) }
             composable("progress") { ProgressScreen(vm) }
             composable("stopwatch") { StopwatchScreen() }
@@ -333,29 +335,18 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
             composable("profile") {
                 ProfileScreen(
                     vm = vm,
-                    onOpenBusiness = { navController.navigate("business") },
                     onOpenRewards = { navController.navigate("rewards") },
-                    onOpenRewardsAdmin = { navController.navigate("rewards-admin") },
                 )
             }
             composable("rewards") {
                 RewardsDestination(
                     vm = vm,
-                    viewerMode = RewardsViewerMode.User,
-                    onOpenAdminPanel = { navController.navigate("rewards-admin") },
                     onBack = { navController.popBackStack() },
                 )
             }
-            composable("rewards-admin") {
-                RewardsAdminDestination(
-                    vm = vm,
-                    onBack = { navController.popBackStack() },
-                )
+            composable("calendar") {
+                CalendarScreen(vm) { navController.popBackStack() }
             }
-            composable("business") {
-                BusinessDestination(onBack = { navController.popBackStack() })
-            }
-            composable("calendar") { CalendarScreen(vm) { navController.popBackStack() } }
             composable(
                 route = "session/{sessionId}?warmup={warmup}",
                 arguments = listOf(
@@ -378,7 +369,9 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
                     onFinished = {
                         if (!navController.popBackStack("today", false)) {
                             navController.navigate("today") {
-                                popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    inclusive = false
+                                }
                                 launchSingleTop = true
                             }
                         }
@@ -390,51 +383,17 @@ private fun LiftlyNavigation(vm: AppViewModel, onboardingDone: Boolean) {
 }
 
 @Composable
-private fun BusinessDestination(onBack: () -> Unit) {
-    val context = LocalContext.current
-    val billingGateway = remember(context) {
-        GooglePlayCommercialBillingGateway(
-            context = context,
-            activityProvider = { context as? Activity },
-        )
-    }
-    DisposableEffect(billingGateway) {
-        onDispose { billingGateway.close() }
-    }
-    BusinessScreen(
-        billingGateway = billingGateway,
-        onPlanInterest = {
-            Toast.makeText(
-                context,
-                "O canal comercial será ativado após configurar domínio e atendimento.",
-                Toast.LENGTH_LONG,
-            ).show()
-        },
-        onOpenActivationGuide = {
-            Toast.makeText(
-                context,
-                "Configure produtos, backend e Play Console conforme o guia comercial.",
-                Toast.LENGTH_LONG,
-            ).show()
-        },
-        onBack = onBack,
-    )
-}
-
-@Composable
 private fun RewardsDestination(
     vm: AppViewModel,
-    viewerMode: RewardsViewerMode,
-    onOpenAdminPanel: () -> Unit,
     onBack: () -> Unit,
 ) {
     val snapshot by vm.rewards.collectAsStateWithLifecycle()
     val sessions by vm.sessions.collectAsStateWithLifecycle()
     val preferences by vm.preferences.collectAsStateWithLifecycle()
-    var selectedCategoryName by rememberSaveable(viewerMode) {
+    var selectedCategoryName by rememberSaveable {
         mutableStateOf(RewardCategory.All.name)
     }
-    var selectedMissionPeriodName by rememberSaveable(viewerMode) {
+    var selectedMissionPeriodName by rememberSaveable {
         mutableStateOf(MissionPeriod.Daily.name)
     }
     val selectedCategory = RewardCategory.entries
@@ -459,101 +418,17 @@ private fun RewardsDestination(
             workoutStreak = completedWeekStreak,
             selectedCategory = selectedCategory,
             selectedMissionPeriod = selectedMissionPeriod,
-            viewerMode = viewerMode,
         ),
         actions = RewardsActions(
             onCategorySelected = { selectedCategoryName = it.name },
             onMissionPeriodSelected = { selectedMissionPeriodName = it.name },
             onBuy = { vm.purchaseRewardItem(it.id) },
             onEquip = { vm.equipRewardItem(it.id) },
-            // Mission payouts are settled atomically when their target is reached.
             onClaimMission = {},
-            onOpenAdminPanel = onOpenAdminPanel,
         ),
         onBack = onBack,
     )
 }
-
-@Composable
-private fun RewardsAdminDestination(
-    vm: AppViewModel,
-    onBack: () -> Unit,
-) {
-    var viewingAsRegularUser by rememberSaveable { mutableStateOf(false) }
-    if (viewingAsRegularUser && BuildConfig.ADMIN_TOOLS) {
-        RewardsDestination(
-            vm = vm,
-            viewerMode = RewardsViewerMode.AdminPreview,
-            onOpenAdminPanel = { viewingAsRegularUser = false },
-            onBack = { viewingAsRegularUser = false },
-        )
-        return
-    }
-
-    val snapshot by vm.rewards.collectAsStateWithLifecycle()
-    val sessions by vm.sessions.collectAsStateWithLifecycle()
-    val completedSessionTimes = remember(sessions) {
-        sessions.asSequence()
-            .filter { it.finishedAt != null && !it.isTestMode }
-            .map { it.startedAt }
-            .toList()
-    }
-    val state = AdminRewardsUiState(
-        coins = snapshot.wallet.coinBalance.toRewardsDisplayInt(),
-        xp = snapshot.wallet.lifetimeXp.toRewardsDisplayInt(),
-        level = snapshot.level.level,
-        levelProgress = snapshot.level.fraction,
-        currentStreakDays = currentWorkoutDayStreak(completedSessionTimes),
-        completedMissions = snapshot.missions.count { it.completedAt != null },
-        unlockedItems = snapshot.store.count { it.owned },
-        totalItems = snapshot.store.count { it.item.enabled },
-        viewingAsRegularUser = false,
-    )
-
-    AdminRewardsScreen(
-        state = state,
-        onViewAsRegularUserChange = { viewingAsRegularUser = it },
-        onAddCoins = { vm.adminGrantRewards(xp = 0L, coins = it.toLong()) },
-        onRemoveCoins = { vm.adminGrantRewards(xp = 0L, coins = -it.toLong()) },
-        onAddXp = { vm.adminGrantRewards(xp = it.toLong(), coins = 0L) },
-        onRemoveXp = { vm.adminGrantRewards(xp = -it.toLong(), coins = 0L) },
-        onSimulateWorkout = { scenario ->
-            vm.adminSimulateRewardWorkout(
-                when (scenario) {
-                    AdminWorkoutSimulation.STANDARD -> "STANDARD"
-                    AdminWorkoutSimulation.COMPLETE -> "COMPLETE"
-                    AdminWorkoutSimulation.PERSONAL_RECORD -> "PR"
-                }
-            )
-        },
-        onSimulateMission = { scenario ->
-            snapshot.missions
-                .firstOrNull { it.period == scenario.name }
-                ?.let { vm.adminCompleteRewardMission(it.id) }
-        },
-        onUnlockAllItems = vm::adminUnlockAllRewards,
-        onResetEconomy = vm::adminResetRewardEconomy,
-        onBack = onBack,
-    )
-}
-
-private fun currentWorkoutDayStreak(completedSessionTimes: List<Long>): Int {
-    val today = LocalDate.now()
-    val zoneId = ZoneId.systemDefault()
-    val workoutDays = completedSessionTimes.asSequence()
-        .map { Instant.ofEpochMilli(it).atZone(zoneId).toLocalDate() }
-        .filter { !it.isAfter(today) }
-        .toSet()
-    var cursor = if (today in workoutDays) today else today.minusDays(1)
-    var streak = 0
-    while (cursor in workoutDays) {
-        streak++
-        cursor = cursor.minusDays(1)
-    }
-    return streak
-}
-
-private fun Long.toRewardsDisplayInt(): Int = coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
 
 @Composable
 private fun ActiveWorkoutDock(
@@ -664,7 +539,11 @@ private fun MusicDestination() {
         onSelectPersonalPlaylist = musicVm::selectPersonalPlaylist,
         onOpenPersonalPlaylist = { id ->
             if (!SpotifyLauncher.openPlaylist(context, SpotifyPlaylistLinks.fromId(id))) {
-                Toast.makeText(context, "Não foi possível abrir o Spotify neste aparelho.", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    "Não foi possível abrir o Spotify neste aparelho.",
+                    Toast.LENGTH_LONG,
+                ).show()
             }
         },
     )
