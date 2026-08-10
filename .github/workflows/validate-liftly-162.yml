@@ -56,7 +56,6 @@ jobs:
       - name: Publish validated 1.6.2 to branch
         run: |
           rm -f tools/apply_liftly_162.py tools/trigger-162.txt
-          rm -f .github/workflows/validate-liftly-162.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
