@@ -116,4 +116,16 @@ if not notes.exists():
         encoding="utf-8",
     )
 
+# The generic idempotency check above sees the 1dp default from GlassCard and can skip the
+# InteractiveGlassCard default. Patch that signature explicitly so clickable surfaces stay subtle.
+components_file = ROOT / components
+components_text = components_file.read_text(encoding="utf-8")
+interactive_old = '''contentPadding: PaddingValues = PaddingValues(0.dp),\n    elevation: androidx.compose.ui.unit.Dp = 7.dp,\n    content: @Composable ColumnScope.() -> Unit,\n) {\n    val interactionSource = remember { MutableInteractionSource() }'''
+interactive_new = '''contentPadding: PaddingValues = PaddingValues(0.dp),\n    elevation: androidx.compose.ui.unit.Dp = 2.dp,\n    content: @Composable ColumnScope.() -> Unit,\n) {\n    val interactionSource = remember { MutableInteractionSource() }'''
+if interactive_old in components_text:
+    components_text = components_text.replace(interactive_old, interactive_new, 1)
+elif interactive_new not in components_text:
+    raise RuntimeError("Assinatura de InteractiveGlassCard inesperada")
+components_file.write_text(components_text, encoding="utf-8")
+
 print("Passe visual final Liftly 1.5.4 aplicado.")
