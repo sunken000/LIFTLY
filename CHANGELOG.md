@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.1 — 2026-08-10
+
+- Restaurada a propagação da carga da primeira série para séries futuras ainda intactas.
+- Todas as séries voltam a ficar visíveis durante a sessão; a próxima permanece destacada.
+- Bi-set restaurado com indicação A/B, execução intercalada e descanso após o exercício B.
+- Tipo de série passa a exibir Bi-set explicitamente no editor.
+- `versionName` 1.6.1 / `versionCode` 39.
+
 ## 1.6.0 — 2026-08-10
 
 - Coach adaptativo agora persiste a próxima prescrição quando há evidência suficiente.

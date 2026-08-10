@@ -8,6 +8,7 @@ import com.liftly.app.domain.EffectiveScheduleResolver
 import com.liftly.app.domain.HistoricalExercisePerformance
 import com.liftly.app.domain.ProgressionCoach
 import com.liftly.app.domain.ProgressionCoachInput
+import com.liftly.app.domain.SessionLoadPropagation
 import com.liftly.app.domain.ParsedSetType
 import com.liftly.app.domain.ParsedWorkout
 import com.liftly.app.domain.TrainingMomentum
@@ -497,9 +498,10 @@ class LiftlyRepository(
         val current = dao.sessionSet(item.id) ?: item
         val value = reps.coerceAtLeast(0)
         val completed = if (toggleCompletion) !current.completed else current.completed
-        dao.upsertSessionSet(current.copy(
+        val normalizedLoad = load.takeIf(Double::isFinite)?.coerceAtLeast(0.0) ?: 0.0
+        val updatedCurrent = current.copy(
             reps = value,
-            loadKg = load.coerceAtLeast(0.0),
+            loadKg = normalizedLoad,
             completed = completed,
             completedAt = when {
                 !toggleCompletion -> current.completedAt
@@ -510,7 +512,15 @@ class LiftlyRepository(
             distanceMeters = if (current.trackingMode == "Distância") value.toDouble() else current.distanceMeters,
             rir = rir?.coerceIn(0, 10),
             painLevel = painLevel.coerceIn(0, 10)
-        ))
+        )
+        dao.upsertSessionSet(updatedCurrent)
+
+        if (SessionLoadPropagation.changedFirstWorkingSet(current, normalizedLoad)) {
+            val inherited = dao.sessionSets(current.sessionId)
+                .filter { sibling -> SessionLoadPropagation.shouldInherit(current, sibling) }
+                .map { sibling -> sibling.copy(loadKg = normalizedLoad) }
+            if (inherited.isNotEmpty()) dao.upsertSessionSets(inherited)
+        }
     }
 
     suspend fun updateSetFromWear(
