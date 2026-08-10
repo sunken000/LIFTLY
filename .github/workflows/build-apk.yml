@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -26,22 +26,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Apply Liftline identity 1.5.5
-        run: |
-          cat tools/liftline_155.part* | base64 -d | gzip -d > tools/apply_liftline_155.py
-          python3 tools/apply_liftline_155.py
-          rm tools/apply_liftline_155.py
-          grep -qxF 'import androidx.compose.foundation.layout.height' app/src/main/java/com/liftly/app/ui/screens/WorkoutsScreen.kt || sed -i '/import androidx.compose.foundation.layout.fillMaxWidth/a import androidx.compose.foundation.layout.height' app/src/main/java/com/liftly/app/ui/screens/WorkoutsScreen.kt
-
       - name: Test and build debug APK
         run: |
           chmod +x ./gradlew
           ./gradlew testDebugUnitTest assembleDebug
 
-      - name: Prepare APK
-        run: |
-          rm -f Liftly-v1.5.4.apk
-          cp app/build/outputs/apk/debug/app-debug.apk Liftly-v1.5.5.apk
+      - name: Prepare APK artifact
+        run: cp app/build/outputs/apk/debug/app-debug.apk Liftly-v1.5.5.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -49,25 +40,3 @@ jobs:
           name: Liftly-v1.5.5
           path: Liftly-v1.5.5.apk
           if-no-files-found: error
-
-      - name: Publish Liftline source and APK to master
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor != 'github-actions[bot]'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/build.gradle.kts \
-                  app/src/main/java/com/liftly/app/ui/theme/Theme.kt \
-                  app/src/main/java/com/liftly/app/ui/components/Components.kt \
-                  app/src/main/java/com/liftly/app/ui/LiftlyApp.kt \
-                  app/src/main/java/com/liftly/app/ui/screens/TodayScreen.kt \
-                  app/src/main/java/com/liftly/app/ui/screens/WorkoutsScreen.kt \
-                  app/src/main/java/com/liftly/app/ui/screens/ProgressScreen.kt \
-                  app/src/main/java/com/liftly/app/ui/screens/OnboardingScreen.kt \
-                  README.md CHANGELOG.md docs/PATCH_NOTES_1.5.5.md
-          git add -A Liftly-v1.5.4.apk Liftly-v1.5.5.apk
-          if git diff --cached --quiet; then
-            echo "Nenhuma mudança para publicar."
-          else
-            git commit -m "Aplica identidade Liftline 1.5.5"
-            git push origin HEAD:master
-          fi
