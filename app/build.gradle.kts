@@ -32,41 +32,14 @@ android {
         applicationId = "com.liftly.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 34
-        versionName = "1.5.2"
+        versionCode = 35
+        versionName = "1.5.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         buildConfigField("String", "MUSIC_CONFIG_URL", musicConfigUrl.asBuildConfigString())
-    }
-
-    flavorDimensions += "edition"
-    productFlavors {
-        create("personal") {
-            dimension = "edition"
-            applicationId = "com.liftly.app"
-            versionCode = 34
-            versionName = "1.5.2"
-            buildConfigField("boolean", "COMMERCIAL_EDITION", "false")
-            buildConfigField("boolean", "ADMIN_TOOLS", "false")
-        }
-        create("business") {
-            dimension = "edition"
-            applicationId = "com.liftly.app.business"
-            versionCode = 1
-            versionName = "1.0.0"
-            buildConfigField("boolean", "COMMERCIAL_EDITION", "true")
-            buildConfigField("boolean", "ADMIN_TOOLS", "false")
-        }
-        create("admin") {
-            dimension = "edition"
-            applicationId = "com.liftly.app.admin"
-            versionCode = 34
-            versionName = "1.5.2-admin"
-            buildConfigField("boolean", "COMMERCIAL_EDITION", "false")
-            buildConfigField("boolean", "ADMIN_TOOLS", "true")
-            resValue("string", "app_name", "Liftly Admin")
-        }
+        buildConfigField("boolean", "COMMERCIAL_EDITION", "false")
+        buildConfigField("boolean", "ADMIN_TOOLS", "false")
     }
 
     buildTypes {
