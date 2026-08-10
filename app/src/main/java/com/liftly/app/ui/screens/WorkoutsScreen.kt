@@ -998,7 +998,7 @@ private fun ConfigureExerciseDialog(
     var repMax by remember(item) { mutableStateOf((item?.repMax ?: 12).toString()) }
     var load by remember(item) { mutableStateOf((item?.targetLoadKg ?: 0.0).toEditableNumber()) }
     var rest by remember(item) { mutableStateOf((item?.restSeconds ?: 60).toString()) }
-    var setType by remember(item) { mutableStateOf(item?.setType ?: "Normal") }
+    var setType by remember(item) { mutableStateOf(if (item?.setType?.contains("supers", ignoreCase = true) == true) "Bi-set" else item?.setType ?: "Normal") }
     var notes by remember(item) { mutableStateOf(item?.notes.orEmpty()) }
     var showPlateCalculator by remember(item) { mutableStateOf(false) }
     var showSubstitutions by remember(item, showSubstitutionsInitially) {
@@ -1197,7 +1197,7 @@ private fun ConfigureExerciseDialog(
                     item {
                         Text("Tipo de série", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            items(listOf("Normal", "Aquecimento", "Dropset", "Supersérie")) { option ->
+                            items(listOf("Normal", "Aquecimento", "Dropset", "Bi-set")) { option ->
                                 AssistChip(onClick = { setType = option }, label = { Text(if (setType == option) "✓ $option" else option) })
                             }
                         }

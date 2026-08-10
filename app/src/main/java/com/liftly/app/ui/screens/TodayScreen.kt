@@ -108,6 +108,7 @@ import com.liftly.app.domain.ProgressionCoach
 import com.liftly.app.domain.ProgressionCoachInput
 import com.liftly.app.domain.ProgressionRecommendation
 import com.liftly.app.domain.ProgressionStatus
+import com.liftly.app.domain.SupersetPlanner
 import com.liftly.app.domain.PROGRESSION_COACH_DISCLAIMER
 import com.liftly.app.service.WorkoutTrackingService
 import com.liftly.app.ui.AppViewModel
@@ -475,6 +476,10 @@ fun SessionScreen(
     val sessionWorkoutItems = remember(session?.workoutId, workoutItems) {
         workoutItems.filter { it.workoutId == session?.workoutId }.sortedBy { it.orderIndex }
     }
+    val supersetMemberships = remember(sessionWorkoutItems) { SupersetPlanner.memberships(sessionWorkoutItems) }
+    val executionSequence = remember(sets, sessionWorkoutItems) {
+        SupersetPlanner.sequence(sets, sessionWorkoutItems)
+    }
     val automaticWarmupPlan = remember(
         showAutomaticWarmup,
         session?.workoutId,
@@ -660,10 +665,7 @@ fun SessionScreen(
         if (warmupTimerStepId == stepId && warmupTimerEndsAt == targetEnd) finishWarmupTimer()
     }
 
-    val nextWorkSet = sets.firstOrNull { !it.completed }
-    val visibleExerciseGroups = nextWorkSet?.workoutExerciseId?.let { focusedId ->
-        orderedExerciseGroups.filter { it.first().workoutExerciseId == focusedId }
-    } ?: orderedExerciseGroups
+    val nextWorkSet = executionSequence.firstOrNull { !it.completed }
     val nextWarmupStep = if (showAutomaticWarmup) {
         generalWarmupSteps.firstOrNull { it.id !in warmupCompletedIds }
             ?: nextWorkSet?.workoutExerciseId?.let { workoutExerciseId ->
@@ -837,7 +839,7 @@ fun SessionScreen(
                     )
                 }
             }
-            visibleExerciseGroups.forEachIndexed { groupIndex, exerciseSets ->
+            orderedExerciseGroups.forEachIndexed { groupIndex, exerciseSets ->
                 val workoutExerciseId = exerciseSets.first().workoutExerciseId
                 val currentExercise = exercises.firstOrNull { it.id == exerciseSets.first().exerciseId }
                 val plannedWorkoutItem = sessionWorkoutItems.firstOrNull { it.id == workoutExerciseId }
@@ -847,7 +849,7 @@ fun SessionScreen(
                     ExerciseSubstitutionEngine.equipmentFamilyLabels(it.equipment)
                 }.orEmpty().filterNot { it == "Peso corporal" || it == "Sem equipamento" }
                 val warmupBeforeExercise = exerciseWarmupSteps[workoutExerciseId].orEmpty()
-                val isFirstGroupForWorkoutItem = visibleExerciseGroups
+                val isFirstGroupForWorkoutItem = orderedExerciseGroups
                     .indexOfFirst { it.first().workoutExerciseId == workoutExerciseId } == groupIndex
                 if (showAutomaticWarmup && warmupBeforeExercise.isNotEmpty() && isFirstGroupForWorkoutItem) {
                     item(key = "$workoutExerciseId-automatic-warmup") {
@@ -903,6 +905,25 @@ fun SessionScreen(
                                 Text("Trocar agora")
                             }
                         }
+                        supersetMemberships[workoutExerciseId]?.let { membership ->
+                            val partnerName = sessionWorkoutItems
+                                .firstOrNull { it.id == membership.partnerWorkoutExerciseId }
+                                ?.exerciseId
+                                ?.let { partnerExerciseId -> exercises.firstOrNull { it.id == partnerExerciseId }?.name }
+                                ?: "exercício parceiro"
+                            Surface(
+                                shape = MaterialTheme.shapes.small,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                            ) {
+                                Text(
+                                    "BI-SET ${if (membership.position == 1) "A" else "B"} • $partnerName",
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                        }
                         if (exerciseSets.any { !it.completed } && equipmentFamilies.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                 Text(
@@ -956,8 +977,7 @@ fun SessionScreen(
                         )
                     }
                 }
-                val visibleSets = exerciseSets.filter { it.completed || it.id == nextWorkSet?.id }
-                items(visibleSets, key = { it.id }) { set ->
+                items(exerciseSets, key = { it.id }) { set ->
                     val equipment = exercises.firstOrNull { it.id == set.exerciseId }?.equipment.orEmpty()
                     val previousSet = allSets.asSequence()
                         .filter { it.sessionId != sessionId && it.exerciseId == set.exerciseId && it.completed }
@@ -974,14 +994,18 @@ fun SessionScreen(
                         vm.saveSet(set, reps, load, toggleCompletion = check, rir = rir, painLevel = painLevel)
                         if (check && !set.completed && warmupSecondsLeft > 0) clearWarmupTimer()
                         if (check && !set.completed && preferences.restTimer) {
-                            val restSeconds = workoutItems
-                                .firstOrNull { it.id == set.workoutExerciseId }
-                                ?.restSeconds
-                                ?.coerceIn(0, 3_600)
-                                ?: 60
-                            if (restSeconds > 0) {
+                            val restSeconds = SupersetPlanner.restSecondsAfter(set.workoutExerciseId, sessionWorkoutItems)
+                            if (restSeconds == null) {
+                                // Bi-set A: segue direto para o parceiro, sem descanso intermediário.
+                                restEndsAt = 0L
+                                WorkoutTrackingService.cancelRest(
+                                    context = context,
+                                    exerciseName = set.exerciseName,
+                                    workoutName = session?.workoutName.orEmpty(),
+                                )
+                            } else if (restSeconds > 0) {
                                 restEndsAt = System.currentTimeMillis() + restSeconds * 1_000L
-                                val nextExerciseName = sets
+                                val nextExerciseName = executionSequence
                                     .firstOrNull { candidate -> !candidate.completed && candidate.id != set.id }
                                     ?.exerciseName
                                     ?: "Todas as séries concluídas"
@@ -1245,7 +1269,11 @@ private fun SessionSetRow(
     TrainingSetSurface(
         numberLabel = set.setNumber.toString().padStart(2, '0'),
         title = set.exerciseName,
-        subtitle = if (isFocus) "SÉRIE ATUAL" else "Série concluída",
+        subtitle = when {
+            set.completed -> "SÉRIE CONCLUÍDA"
+            isFocus -> "SÉRIE ATUAL"
+            else -> "SÉRIE PLANEJADA"
+        },
         completed = set.completed,
         onCompletedChange = { persist(toggle = true) },
         badge = if (isFocus && !set.completed) "AGORA" else null,
