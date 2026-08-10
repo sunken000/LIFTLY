@@ -105,6 +105,7 @@ import com.liftly.app.domain.ProgressionCoach
 import com.liftly.app.domain.ProgressionCoachInput
 import com.liftly.app.domain.ProgressionRecommendation
 import com.liftly.app.domain.ProgressionStatus
+import com.liftly.app.domain.SupersetPlanner
 import com.liftly.app.domain.PROGRESSION_COACH_DISCLAIMER
 import com.liftly.app.service.WorkoutTrackingService
 import com.liftly.app.ui.AppViewModel
@@ -429,6 +430,10 @@ fun SessionScreen(
     val sessionWorkoutItems = remember(session?.workoutId, workoutItems) {
         workoutItems.filter { it.workoutId == session?.workoutId }.sortedBy { it.orderIndex }
     }
+    val supersetMemberships = remember(sessionWorkoutItems) { SupersetPlanner.memberships(sessionWorkoutItems) }
+    val executionSequence = remember(sets, sessionWorkoutItems) {
+        SupersetPlanner.sequence(sets, sessionWorkoutItems)
+    }
     val automaticWarmupPlan = remember(
         showAutomaticWarmup,
         session?.workoutId,
@@ -614,7 +619,7 @@ fun SessionScreen(
         if (warmupTimerStepId == stepId && warmupTimerEndsAt == targetEnd) finishWarmupTimer()
     }
 
-    val nextWorkSet = sets.firstOrNull { !it.completed }
+    val nextWorkSet = executionSequence.firstOrNull { !it.completed }
     val nextWarmupStep = if (showAutomaticWarmup) {
         generalWarmupSteps.firstOrNull { it.id !in warmupCompletedIds }
             ?: nextWorkSet?.workoutExerciseId?.let { workoutExerciseId ->
@@ -732,6 +737,29 @@ fun SessionScreen(
                         Text("$completed/${sets.size} séries", color = MaterialTheme.colorScheme.primary)
                     }
                     LinearProgressIndicator({ progress }, Modifier.fillMaxWidth().height(8.dp).clip(CircleShape))
+                }
+            }
+            nextWorkSet?.let { nextSet ->
+                item(key = "next-work-set") {
+                    val membership = supersetMemberships[nextSet.workoutExerciseId]
+                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+                        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text("Próxima ação", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                            Text(
+                                "${nextSet.exerciseName} • série ${nextSet.setNumber}",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            )
+                            membership?.let {
+                                Text(
+                                    if (it.position == 1) "Bi-set A: depois siga direto para o exercício B."
+                                    else "Bi-set B: complete e então faça o descanso do grupo.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                )
+                            }
+                        }
+                    }
                 }
             }
             if (unavailableEquipment.isNotEmpty()) {
@@ -854,6 +882,25 @@ fun SessionScreen(
                                 Text("Trocar agora")
                             }
                         }
+                        supersetMemberships[workoutExerciseId]?.let { membership ->
+                            val partnerName = sessionWorkoutItems
+                                .firstOrNull { it.id == membership.partnerWorkoutExerciseId }
+                                ?.exerciseId
+                                ?.let { partnerExerciseId -> exercises.firstOrNull { it.id == partnerExerciseId }?.name }
+                                ?: "exercício parceiro"
+                            Surface(
+                                shape = MaterialTheme.shapes.small,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                            ) {
+                                Text(
+                                    "BI-SET ${if (membership.position == 1) "A" else "B"} • $partnerName",
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                        }
                         if (exerciseSets.any { !it.completed } && equipmentFamilies.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                 Text(
@@ -911,6 +958,7 @@ fun SessionScreen(
                     val equipment = exercises.firstOrNull { it.id == set.exerciseId }?.equipment.orEmpty()
                     SessionSetRow(
                         set = set,
+                        isNext = nextWorkSet?.id == set.id,
                         supportsPlateCalculator = equipment.contains("barra", ignoreCase = true) ||
                             equipment.contains("smith", ignoreCase = true) ||
                             equipment.contains("anilha", ignoreCase = true),
@@ -918,14 +966,18 @@ fun SessionScreen(
                         vm.saveSet(set, reps, load, toggleCompletion = check, rir = rir, painLevel = painLevel)
                         if (check && !set.completed && warmupSecondsLeft > 0) clearWarmupTimer()
                         if (check && !set.completed && preferences.restTimer) {
-                            val restSeconds = workoutItems
-                                .firstOrNull { it.id == set.workoutExerciseId }
-                                ?.restSeconds
-                                ?.coerceIn(0, 3_600)
-                                ?: 60
-                            if (restSeconds > 0) {
+                            val restSeconds = SupersetPlanner.restSecondsAfter(set.workoutExerciseId, sessionWorkoutItems)
+                            if (restSeconds == null) {
+                                // Primeira metade do bi-set: vá direto ao parceiro, sem descanso intermediário.
+                                restEndsAt = 0L
+                                WorkoutTrackingService.cancelRest(
+                                    context = context,
+                                    exerciseName = set.exerciseName,
+                                    workoutName = session?.workoutName.orEmpty(),
+                                )
+                            } else if (restSeconds > 0) {
                                 restEndsAt = System.currentTimeMillis() + restSeconds * 1_000L
-                                val nextExerciseName = sets
+                                val nextExerciseName = executionSequence
                                     .firstOrNull { candidate -> !candidate.completed && candidate.id != set.id }
                                     ?.exerciseName
                                     ?: "Todas as séries concluídas"
@@ -1163,18 +1215,22 @@ fun SessionScreen(
 @Composable
 private fun SessionSetRow(
     set: SessionSetEntity,
+    isNext: Boolean,
     supportsPlateCalculator: Boolean,
     onChange: (Int, Double, Boolean, Int?, Int) -> Unit,
 ) {
     // O rascunho visível não deve voltar a um valor antigo enquanto o Room confirma teclas anteriores.
     var repsText by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(set.reps.toString()) }
-    var loadText by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(set.loadKg.toClean()) }
+    var loadText by rememberSaveable(set.id, set.exerciseId, set.loadKg) { mutableStateOf(set.loadKg.toClean()) }
     var rir by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(set.rir) }
     var painLevel by rememberSaveable(set.id, set.exerciseId) { mutableIntStateOf(set.painLevel) }
     var showEffort by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(false) }
     var showPlateCalculator by rememberSaveable(set.id, set.exerciseId) { mutableStateOf(false) }
     Card(colors = CardDefaults.cardColors(containerColor = if (set.completed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant)) {
         Column(Modifier.fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (isNext && !set.completed) {
+                Text("PRÓXIMA NA SEQUÊNCIA", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+            }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("${set.setNumber}", Modifier.size(28.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                 OutlinedTextField(

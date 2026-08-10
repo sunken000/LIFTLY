@@ -275,6 +275,11 @@ class AppViewModel(
     fun removeWorkoutExercise(id: String) = act("Exercício removido.") { repository.removeWorkoutExercise(id); updateTodayWidget() }
     fun moveWorkoutExercise(workoutId: String, id: String, direction: Int) = act { repository.moveWorkoutExercise(workoutId, id, direction); updateTodayWidget() }
     fun moveWorkoutExerciseBefore(workoutId: String, id: String, beforeId: String) = act { repository.moveWorkoutExerciseBefore(workoutId, id, beforeId); updateTodayWidget() }
+    fun setSupersetPair(workoutId: String, firstId: String, secondId: String, enabled: Boolean) =
+        act(if (enabled) "Bi-set criado." else "Bi-set removido.") {
+            repository.setSupersetPair(workoutId, firstId, secondId, enabled)
+            updateTodayWidget()
+        }
 
     fun saveCustomExercise(exercise: ExerciseEntity) = act("Exercício personalizado salvo.") { repository.saveExercise(exercise) }
     fun renameExercise(id: String, name: String) = act("Nome do exercício atualizado.") { repository.renameExercise(id, name) }

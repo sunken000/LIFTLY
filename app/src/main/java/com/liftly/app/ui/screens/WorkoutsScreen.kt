@@ -93,6 +93,8 @@ import com.liftly.app.data.WorkoutShareCodec
 import com.liftly.app.data.WorkoutEntity
 import com.liftly.app.data.WorkoutExerciseEntity
 import com.liftly.app.domain.SuggestionSeverity
+import com.liftly.app.domain.SupersetMembership
+import com.liftly.app.domain.SupersetPlanner
 import com.liftly.app.domain.BarbellPlateCalculator
 import com.liftly.app.domain.ExerciseSubstitutionEngine
 import com.liftly.app.domain.ExerciseSubstitutionOptions
@@ -227,6 +229,7 @@ fun WorkoutsScreen(
         workoutExercises.filter { it.workoutId == workout.id }.sortedBy { it.orderIndex }
     }.orEmpty()
     val exerciseById = exercises.associateBy { it.id }
+    val supersetMemberships = remember(selectedItems) { SupersetPlanner.memberships(selectedItems) }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -338,14 +341,32 @@ fun WorkoutsScreen(
                         }
                     } else {
                         itemsIndexed(selectedItems, key = { _, item -> item.id }) { index, item ->
+                            val membership = supersetMemberships[item.id]
+                            val partnerItem = membership?.partnerWorkoutExerciseId?.let { partnerId ->
+                                selectedItems.firstOrNull { it.id == partnerId }
+                            }
+                            val nextItem = selectedItems.getOrNull(index + 1)
                             WorkoutExerciseCard(
                                 number = index + 1,
                                 item = item,
                                 exercise = exerciseById[item.exerciseId],
-                                canMoveUp = index > 0,
-                                canMoveDown = index < selectedItems.lastIndex,
+                                supersetMembership = membership,
+                                supersetPartnerName = partnerItem?.let { exerciseById[it.exerciseId]?.name },
+                                canPairWithNext = membership == null && nextItem != null,
+                                canMoveUp = membership == null && index > 0,
+                                canMoveDown = membership == null && index < selectedItems.lastIndex,
                                 onMoveUp = { vm.moveWorkoutExercise(workout.id, item.id, -1) },
                                 onMoveDown = { vm.moveWorkoutExercise(workout.id, item.id, 1) },
+                                onPairWithNext = {
+                                    nextItem?.let { vm.setSupersetPair(workout.id, item.id, it.id, true) }
+                                },
+                                onRemovePair = {
+                                    membership?.let { group ->
+                                        val firstId = if (group.position == 1) item.id else group.partnerWorkoutExerciseId
+                                        val secondId = if (group.position == 1) group.partnerWorkoutExerciseId else item.id
+                                        vm.setSupersetPair(workout.id, firstId, secondId, false)
+                                    }
+                                },
                                 onEdit = {
                                     openSubstitutionsOnConfigure = false
                                     configuringItem = item
@@ -801,10 +822,15 @@ private fun WorkoutExerciseCard(
     number: Int,
     item: WorkoutExerciseEntity,
     exercise: ExerciseEntity?,
+    supersetMembership: SupersetMembership?,
+    supersetPartnerName: String?,
+    canPairWithNext: Boolean,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
+    onPairWithNext: () -> Unit,
+    onRemovePair: () -> Unit,
     onEdit: () -> Unit,
     onSubstitute: () -> Unit,
     onRemove: () -> Unit,
@@ -838,6 +864,39 @@ private fun WorkoutExerciseCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(item.setType, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     exercise?.let { Text(it.muscleGroup, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
+                if (supersetMembership != null) {
+                    Text(
+                        "BI-SET ${if (supersetMembership.position == 1) "A" else "B"} • ${supersetPartnerName ?: "exercício parceiro"}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        if (supersetMembership.position == 1) "Execute este exercício e siga direto para o parceiro, sem descanso."
+                        else "O descanso do grupo começa depois deste exercício.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    TextButton(
+                        onClick = onRemovePair,
+                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                    ) { Text("Desfazer bi-set") }
+                } else if (canPairWithNext) {
+                    TextButton(
+                        onClick = onPairWithNext,
+                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                    ) {
+                        Icon(Icons.Outlined.SwapHoriz, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(5.dp))
+                        Text("Bi-set com o próximo")
+                    }
+                } else if (SupersetPlanner.isMarked(item)) {
+                    Text(
+                        "Supersérie sem par. Agrupe este exercício com outro adjacente.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
                 }
                 TextButton(
                     onClick = onSubstitute,

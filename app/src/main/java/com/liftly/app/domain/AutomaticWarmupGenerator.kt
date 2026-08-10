@@ -462,32 +462,18 @@ class AutomaticWarmupGenerator(
             (!isCardio() && !isMobility() && !isTimeTracked() && !isDistanceTracked())
     }
 
-    private fun WarmupExerciseInput.isCompound(): Boolean {
-        val movement = movementType.normalized()
-        return COMPOUND_ALIASES.any(movement::contains)
-    }
+    private fun WarmupExerciseInput.identity(): ExerciseIdentity = ExerciseIdentityResolver.resolve(
+        name = exerciseName,
+        movementType = movementType,
+        muscleGroup = muscleGroup,
+        secondaryMuscles = secondaryMuscles,
+        equipment = equipment,
+        category = category,
+    )
 
-    private fun WarmupExerciseInput.canonicalPattern(): String {
-        val movement = movementType.normalized()
-        return when {
-            movement.contains("empurrar com pernas") || movement.contains("leg press") -> "squat"
-            movement.contains("empurrar vertical") -> "vertical_push"
-            movement.contains("empurrar") || movement.contains("aducao horizontal") -> "horizontal_push"
-            movement.contains("puxar vertical") || movement.contains("extensao de ombro") -> "vertical_pull"
-            movement.contains("puxar horizontal") || movement.contains("remar") -> "horizontal_pull"
-            movement.contains("agachar") || movement.contains("subir degrau") || movement.contains("afundo") -> "squat"
-            movement.contains("hinge") || movement.contains("levantamento") || movement.contains("extensao de quadril") -> "hip_hinge"
-            movement.contains("flexao de joelho") -> "knee_flexion"
-            movement.contains("extensao de joelho") -> "knee_extension"
-            movement.contains("flexao de cotovelo") || muscleGroup.normalized().contains("biceps") -> "elbow_flexion"
-            movement.contains("extensao de cotovelo") || muscleGroup.normalized().contains("triceps") -> "elbow_extension"
-            movement.contains("panturr") || muscleGroup.normalized().contains("panturr") -> "calf"
-            movement.contains("core") || muscleGroup.normalized().contains("core") || movement.contains("anti-") -> "core"
-            isCardio() -> "cardio"
-            isMobility() -> "mobility"
-            else -> movement.substringBefore(" unilateral").ifBlank { muscleGroup.normalized().ifBlank { "general" } }
-        }
-    }
+    private fun WarmupExerciseInput.isCompound(): Boolean = identity().isCompound
+
+    private fun WarmupExerciseInput.canonicalPattern(): String = identity().movementPattern
 
     private fun patternLabel(pattern: String): String = when (pattern) {
         "vertical_push" -> "empurrar vertical"
