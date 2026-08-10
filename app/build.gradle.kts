@@ -38,8 +38,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         buildConfigField("String", "MUSIC_CONFIG_URL", musicConfigUrl.asBuildConfigString())
-        buildConfigField("boolean", "COMMERCIAL_EDITION", "false")
-        buildConfigField("boolean", "ADMIN_TOOLS", "false")
     }
 
     buildTypes {
