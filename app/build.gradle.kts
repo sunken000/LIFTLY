@@ -97,7 +97,6 @@ dependencies {
     implementation("androidx.room:room-ktx:2.8.4")
     implementation("androidx.work:work-runtime:2.11.2")
     implementation("androidx.health.connect:connect-client:1.1.0")
-    implementation("com.android.billingclient:billing-ktx:9.1.0")
     implementation("com.google.code.gson:gson:2.14.0")
     implementation("com.google.zxing:core:3.5.4")
     ksp("androidx.room:room-compiler:2.8.4")
